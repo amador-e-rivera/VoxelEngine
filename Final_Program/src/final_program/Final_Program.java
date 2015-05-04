@@ -12,7 +12,7 @@ import org.lwjgl.util.glu.GLU;
 
 /**
  *test
- *Amador
+ *
  */
 public class Final_Program {
 
