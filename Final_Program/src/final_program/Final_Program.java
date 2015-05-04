@@ -41,7 +41,7 @@ public class Final_Program {
             }
         }
         Display.setDisplayMode(displayMode);
-        Display.setTitle("Final Program - Checkpoin 1");
+        Display.setTitle("Final Program - Checkpoint 1");
         Display.create();
     }
 
