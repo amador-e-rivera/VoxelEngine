@@ -11,18 +11,19 @@ import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.util.glu.GLU;
 
 /**
- *test
+ * test
  *
  */
 public class Final_Program {
 
-    private FPCameraController fp = new FPCameraController(0f, 0f, 0f);
+    private FPCameraController fp;
     private DisplayMode displayMode;
 
     public void start() {
         try {
             createWindow();
             initGL();
+            fp = new FPCameraController(0f, 0f, 0f);
             fp.gameLoop(); //render();
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,11 +48,15 @@ public class Final_Program {
 
     private void initGL() {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_TEXTURE_2D);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        GLU.gluPerspective(100.0f, (float) displayMode.getWidth() / 
-                (float) displayMode.getHeight(), 0.1f, 300.0f);
+        GLU.gluPerspective(100.0f, (float) displayMode.getWidth()
+                / (float) displayMode.getHeight(), 0.1f, 300.0f);
         glMatrixMode(GL_MODELVIEW);
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     }
