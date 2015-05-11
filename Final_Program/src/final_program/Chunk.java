@@ -29,7 +29,7 @@ public class Chunk {
 
     public Chunk(int startX, int startY, int startZ) {
         try {
-            texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Faithful.png"));
+            texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("/textures/terrain.png"));
         } catch (Exception e) {
             System.out.print("ER-ROAR!");
         }
@@ -79,12 +79,15 @@ public class Chunk {
     }
 
     public void rebuildMesh(float startX, float startY, float startZ) {
+        //SimplexNoise noise = new SimplexNoise();
+        //int i = (int)(StartX + x * ((CHUNK_SIZE - StartX) / CHUNK_SIZE));
+
         int bufferSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12;
-        
+
         VBOColorHandle = glGenBuffers();
         VBOVertexHandle = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
-        
+
         FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
@@ -174,42 +177,9 @@ public class Chunk {
     }
 
     public static float[] createTexCube(float x, float y, Block block) {
-        float offset = (1024f / 30) / 1024f;
+        float offset = (1024f / 16) / 1024f;
 
         switch (block.getID()) {
-            case 0:
-                return new float[]{
-                    // BOTTOM QUAD(DOWN=+Y)
-                    x + offset * 3, y + offset * 10,
-                    x + offset * 2, y + offset * 10,
-                    x + offset * 2, y + offset * 9,
-                    x + offset * 3, y + offset * 9,
-                    // TOP!
-                    x + offset * 3, y + offset * 1,
-                    x + offset * 2, y + offset * 1,
-                    x + offset * 2, y + offset * 0,
-                    x + offset * 3, y + offset * 0,
-                    // FRONT QUAD
-                    x + offset * 2, y + offset * 0,
-                    x + offset * 3, y + offset * 0,
-                    x + offset * 3, y + offset * 1,
-                    x + offset * 2, y + offset * 1,
-                    // BACK QUAD
-                    x + offset * 4, y + offset * 1,
-                    x + offset * 3, y + offset * 1,
-                    x + offset * 3, y + offset * 0,
-                    x + offset * 4, y + offset * 0,
-                    // LEFT QUAD
-                    x + offset * 3, y + offset * 0,
-                    x + offset * 4, y + offset * 0,
-                    x + offset * 4, y + offset * 1,
-                    x + offset * 3, y + offset * 1,
-                    // RIGHT QUAD
-                    x + offset * 3, y + offset * 0,
-                    x + offset * 4, y + offset * 0,
-                    x + offset * 4, y + offset * 1,
-                    x + offset * 3, y + offset * 1
-                };
             default:
                 return new float[]{
                     // BOTTOM QUAD(DOWN=+Y)
