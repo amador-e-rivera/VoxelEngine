@@ -29,7 +29,7 @@ public class Chunk {
 
     public Chunk(int startX, int startY, int startZ) {
         try {
-            texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("/res/Faithful.png"));
+            texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Faithful.png"));
         } catch (Exception e) {
             System.out.print("ER-ROAR!");
         }
