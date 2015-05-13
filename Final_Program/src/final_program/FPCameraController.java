@@ -18,7 +18,7 @@ import org.lwjgl.Sys;
  */
 public class FPCameraController {
 
-    private final float WORLD_SIZE = 60f;
+    private final float WORLD_SIZE = 125f;
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
     private Chunk chunk;
@@ -166,9 +166,11 @@ public class FPCameraController {
             camera.lookThrough();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             //you would draw your scene here.
-            glTranslatef(40f, -100f, 0f);
-            glRotatef(180f, 0f, 1f, 0f);
+            glTranslatef(40f, -130f, 0f);
+            glRotatef(175f, 0f, 1f, 0f);
+            
             chunk.render();
+            //render();
             //draw the buffer to the screen
             Display.update();
             Display.sync(60);
@@ -193,42 +195,42 @@ public class FPCameraController {
     private void drawWorld() {
 
         //Bottom Face
-        glColor3f((float) 87 / 255, (float) 59 / 255, (float) 12 / 255);
+        glColor3f((float) 153 / 255, (float) 217 / 255, (float) 234 / 255);
         glVertex3f(WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
 
         //Top Face
-        glColor3f(0.0f, 0.0f, 0.0f);
+        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
         glVertex3f(WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
         glVertex3f(WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
 
         //Front Face
-        glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
+        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
         glVertex3f(WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
         glVertex3f(WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
 
         //Back Face
-        glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
+        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
         glVertex3f(WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
 
         //Left face
-        glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
+        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
         glVertex3f(-WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(-WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
 
         //Right Face
-        glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
+        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
         glVertex3f(WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
         glVertex3f(WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
         glVertex3f(WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);

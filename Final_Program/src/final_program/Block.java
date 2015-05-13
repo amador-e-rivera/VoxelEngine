@@ -64,4 +64,11 @@ public class Block {
     public int getID() {
         return blockType.getID();
     }
+    
+    //AMADOR: Added this method which will be useful to set the block on the map depending on its position.
+    //For example, if the max y for the current xz position is 5, then we could use this to set the block
+    //as Water. If the max y for the current xz poition is 6, then we can set that as a Sand block...etc
+    public void setBlockType(BlockType blockType) {
+        this.blockType = blockType;
+    }
 }

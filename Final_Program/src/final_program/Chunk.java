@@ -17,7 +17,7 @@ import org.newdawn.slick.util.ResourceLoader;
 
 public class Chunk {
 
-    static final int CHUNK_SIZE = 30;
+    static final int CHUNK_SIZE = 60; //AMADOR: Increased Chunk size to see the terrain a little better.
     static final int CUBE_LENGTH = 2;
     private Block[][][] blocks;
     private int VBOVertexHandle;
@@ -78,9 +78,16 @@ public class Chunk {
         glPopMatrix();
     }
 
+    //AMADOR: Play with the mountain_Height, mountain_Width and persistance.
     public void rebuildMesh(float startX, float startY, float startZ) {
-        //SimplexNoise noise = new SimplexNoise();
-        //int i = (int)(StartX + x * ((CHUNK_SIZE - StartX) / CHUNK_SIZE));
+        int max_Height = 0; //AMADOR: Max height (y) for the current xz position. No need to change this.
+        int mountain_Height = 200; //AMADOR: Larger number makes the mountains steeper.
+        int mountain_Width = 70; //AMADOR: A smaller value gives more peaks and less wide mountains.
+        double persistance = 0.08; //AMADOR: Not sure how to describe this.
+        int i, j, k;
+
+        //AMADOR: I set the seed to use the random object for random map generation.
+        SimplexNoise noise = new SimplexNoise(mountain_Width, persistance, r.nextInt());
 
         int bufferSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12;
 
@@ -91,46 +98,56 @@ public class Chunk {
         FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
-        
-        SimplexNoise noise = new SimplexNoise(CHUNK_SIZE + 30, .3, 3);
-        
-        float heightx = 20;//!
-        float heightz = 20;//!
-        
-        Random rn = new Random();//!
 
-        for (float x = 0; x < CHUNK_SIZE; x += 1) {
-            heightx = 20;//!
-            
-            
-            heightx += rn.nextInt(3) - 1; //delete this line
-            
-            for (float z = 0; z < CHUNK_SIZE; z += 1) {
-                heightz = 20;//!
-                
-                /*
-                int i=(int)(startX+x*(((startX + CHUNK_SIZE)-startX)/CHUNK_SIZE));
-                int j=(int)(startX+x*(((startX + CHUNK_SIZE)-startX)/CHUNK_SIZE));
-                int k=(int)(startX+x*(((startX + CHUNK_SIZE)-startX)/CHUNK_SIZE));
-                float height = (startY+ (int)(100*noise.getNoise(i,j,k)) * CUBE_LENGTH);
-                */
-                             
-                heightz += rn.nextInt(3) - 1;//!
-                
-                int height = (int)(heightx + heightz) / 2;//!
-                
-                if (height < 0)//!
-                    height = 0;//!
-                if (height > 29)//!
-                    height = 29;//!
+        for (int x = 0; x < CHUNK_SIZE; x += 1) {
+            for (int z = 0; z < CHUNK_SIZE; z += 1) {
 
-                for (float y = 0; y < height; y++) {
+                //AMADOR: Casted CHUNK_SIZE to double, otherwsie the result of the division would be 0 and
+                //the max_Height will not change.
+                i = (int) (StartX + x * ((CHUNK_SIZE - StartX) / (double) CHUNK_SIZE));
+                j = (int) (StartY + max_Height * ((CHUNK_SIZE - StartY) / (double) CHUNK_SIZE));
+                k = (int) (StartZ + z * ((CHUNK_SIZE - StartZ) / (double) CHUNK_SIZE));
+
+                //AMADOR: Dividing CUBE_LENGTH by 2 made the map look a lot better. It looks like this 
+                //is where the mountain height is set. I set the variable mountain_Height to reflect that.
+                max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k)) * (CUBE_LENGTH / 2));
+
+                //AMADOR: Prevents height from being larger than the chunk size otherwise it throws an 
+                //array out of bounds error. It also sets the minimum height to 4 blocks. I think that 
+                //might be useful to set the block as water when max_Height == 4
+                if (max_Height >= CHUNK_SIZE) {
+                    max_Height = CHUNK_SIZE;
+                } else if (max_Height < 4) {
+                    //AMADOR: If you comment this out, you will see holes in the map.
+                    max_Height = 4;
+                }
+
+                for (int y = 0; y < max_Height; y++) {
+                    //AMADOR: This is where we will set the type of block based on the max_Height and its
+                    //current xz position.
+                    if (max_Height == 4 && y <= 4) {
+                        //BedRock should be at bottom of water
+                        blocks[x][y][z].setBlockType(Block.BlockType.Water);
+                    } else if (max_Height == 5 && y <= 5) {
+                        blocks[x][y][z].setBlockType(Block.BlockType.Sand);
+                    } else if (y == max_Height - 1) {
+                        blocks[x][y][z].setBlockType(Block.BlockType.Grass);
+                    } else if (max_Height > 6 && y <= 3) {
+                        blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
+                    } else {
+                        if (r.nextDouble() < 0.8) {
+                            blocks[x][y][z].setBlockType(Block.BlockType.Dirt);
+                        } else {
+                            blocks[x][y][z].setBlockType(Block.BlockType.Stone);
+                        }
+                    }
+
                     VertexPositionData.put(createCube((float) (startX + x * CUBE_LENGTH),
                             (float) (y * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) (startZ + z * CUBE_LENGTH)));
-                    VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[(int) x][(int) y][(int) z])));
+                    VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x][y][z])));
                     VertexTextureData.put(createTexCube((float) 0, (float) 0,
-                            blocks[(int) (x)][(int) (y)][(int) (z)]));
+                            blocks[x][y][z]));
                 }
             }
         }
@@ -202,14 +219,14 @@ public class Chunk {
                 return new float[]{1, 0.5f, 0};
             case 3:
                 return new float[]{0, 0f, 1f};
-        }*/
+         }*/
         return new float[]{1, 1, 1};
     }
 
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f / 16) / 1024f;
-        Block.BlockType temp = block.getBlockType();        
-        switch (temp) {
+        Block.BlockType temp = block.getBlockType();
+                switch (temp) {
             case Grass:
                 return new float[]{
                     // BOTTOM QUAD(DOWN=+Y)
