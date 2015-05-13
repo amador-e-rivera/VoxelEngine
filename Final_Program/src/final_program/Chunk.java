@@ -208,8 +208,9 @@ public class Chunk {
 
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f / 16) / 1024f;
-
-        switch (block.getID()) {
+        Block.BlockType temp = block.getBlockType();        
+        switch (temp) {
+            //case Grass:
             default:
                 return new float[]{
                     // BOTTOM QUAD(DOWN=+Y)

@@ -39,6 +39,9 @@ public class Block {
             blockID = id;
         }
     }
+    public BlockType getBlockType() {
+        return blockType;
+    }
 
     public Block(BlockType blockType) {
         this.blockType = blockType;
