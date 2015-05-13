@@ -91,10 +91,40 @@ public class Chunk {
         FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
+        
+        SimplexNoise noise = new SimplexNoise(CHUNK_SIZE + 30, .3, 3);
+        
+        float heightx = 20;//!
+        float heightz = 20;//!
+        
+        Random rn = new Random();//!
 
         for (float x = 0; x < CHUNK_SIZE; x += 1) {
+            heightx = 20;//!
+            
+            
+            heightx += rn.nextInt(3) - 1; //delete this line
+            
             for (float z = 0; z < CHUNK_SIZE; z += 1) {
-                for (float y = 0; y < CHUNK_SIZE; y++) {
+                heightz = 20;//!
+                
+                /*
+                int i=(int)(startX+x*(((startX + CHUNK_SIZE)-startX)/CHUNK_SIZE));
+                int j=(int)(startX+x*(((startX + CHUNK_SIZE)-startX)/CHUNK_SIZE));
+                int k=(int)(startX+x*(((startX + CHUNK_SIZE)-startX)/CHUNK_SIZE));
+                float height = (startY+ (int)(100*noise.getNoise(i,j,k)) * CUBE_LENGTH);
+                */
+                             
+                heightz += rn.nextInt(3) - 1;//!
+                
+                int height = (int)(heightx + heightz) / 2;//!
+                
+                if (height < 0)//!
+                    height = 0;//!
+                if (height > 29)//!
+                    height = 29;//!
+
+                for (float y = 0; y < height; y++) {
                     VertexPositionData.put(createCube((float) (startX + x * CUBE_LENGTH),
                             (float) (y * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) (startZ + z * CUBE_LENGTH)));
