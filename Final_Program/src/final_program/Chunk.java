@@ -40,15 +40,7 @@ public class Chunk {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
-                    if (r.nextFloat() > 0.7f) {
-                        blocks[x][y][z] = new Block(Block.BlockType.Grass);
-                    } else if (r.nextFloat() > 0.4f) {
-                        blocks[x][y][z] = new Block(Block.BlockType.Sand);
-                    } else if (r.nextFloat() > 0.2f) {
-                        blocks[x][y][z] = new Block(Block.BlockType.BedRock);
-                    } else {
-                        blocks[x][y][z] = new Block(Block.BlockType.Wood);
-                    }
+                    blocks[x][y][z] = new Block(Block.BlockType.BedRock);
                 }
             }
         }
@@ -80,9 +72,9 @@ public class Chunk {
 
     //AMADOR: Play with the mountain_Height, mountain_Width and persistance.
     public void rebuildMesh(float startX, float startY, float startZ) {
-        int max_Height = 0; //AMADOR: Max height (y) for the current xz position. No need to change this.
-        int mountain_Height = 200; //AMADOR: Larger number makes the mountains steeper.
-        int mountain_Width = 70; //AMADOR: A smaller value gives more peaks and less wide mountains.
+        int max_Height = CHUNK_SIZE; //AMADOR: Max height (y) for the current xz position. No need to change this.
+        int mountain_Height = 175; //AMADOR: Larger number makes the mountains steeper.
+        int mountain_Width = 90; //AMADOR: A smaller value gives more peaks and less wide mountains.
         double persistance = 0.08; //AMADOR: Not sure how to describe this.
         int i, j, k;
 
@@ -101,47 +93,28 @@ public class Chunk {
 
         for (int x = 0; x < CHUNK_SIZE; x += 1) {
             for (int z = 0; z < CHUNK_SIZE; z += 1) {
-
-                //AMADOR: Casted CHUNK_SIZE to double, otherwsie the result of the division would be 0 and
-                //the max_Height will not change.
-                i = (int) (StartX + x * ((CHUNK_SIZE - StartX) / (double) CHUNK_SIZE));
-                j = (int) (StartY + max_Height * ((CHUNK_SIZE - StartY) / (double) CHUNK_SIZE));
-                k = (int) (StartZ + z * ((CHUNK_SIZE - StartZ) / (double) CHUNK_SIZE));
-
-                //AMADOR: Dividing CUBE_LENGTH by 2 made the map look a lot better. It looks like this 
-                //is where the mountain height is set. I set the variable mountain_Height to reflect that.
-                max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k)) * (CUBE_LENGTH / 2));
-
-                //AMADOR: Prevents height from being larger than the chunk size otherwise it throws an 
-                //array out of bounds error. It also sets the minimum height to 4 blocks. I think that 
-                //might be useful to set the block as water when max_Height == 4
-                if (max_Height >= CHUNK_SIZE) {
-                    max_Height = CHUNK_SIZE;
-                } else if (max_Height < 4) {
-                    //AMADOR: If you comment this out, you will see holes in the map.
-                    max_Height = 4;
-                }
-
                 for (int y = 0; y < max_Height; y++) {
-                    //AMADOR: This is where we will set the type of block based on the max_Height and its
-                    //current xz position.
-                    if (max_Height == 4 && y <= 4) {
-                        //BedRock should be at bottom of water
-                        blocks[x][y][z].setBlockType(Block.BlockType.Water);
-                    } else if (max_Height == 5 && y <= 5) {
-                        blocks[x][y][z].setBlockType(Block.BlockType.Sand);
-                    } else if (y == max_Height - 1) {
-                        blocks[x][y][z].setBlockType(Block.BlockType.Grass);
-                    } else if (max_Height > 6 && y <= 3) {
-                        blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
-                    } else {
-                        if (r.nextDouble() < 0.8) {
-                            blocks[x][y][z].setBlockType(Block.BlockType.Dirt);
-                        } else {
-                            blocks[x][y][z].setBlockType(Block.BlockType.Stone);
-                        }
+                    //AMADOR: Casted CHUNK_SIZE to double, otherwsie the result of the division would be 0 and
+                    //the max_Height will not change.
+                    i = (int) (StartX + x * ((CHUNK_SIZE - StartX) / (double) CHUNK_SIZE));
+                    j = (int) (StartY + max_Height * ((CHUNK_SIZE - StartY) / (double) CHUNK_SIZE));
+                    k = (int) (StartZ + z * ((CHUNK_SIZE - StartZ) / (double) CHUNK_SIZE));
+
+                    //AMADOR: Dividing CUBE_LENGTH by 2 made the map look a lot better. It looks like this 
+                    //is where the mountain height is set. I set the variable mountain_Height to reflect that.
+                    max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k)) * (CUBE_LENGTH / 2));
+
+                    //AMADOR: Prevents height from being larger than the chunk size otherwise it throws an 
+                    //array out of bounds error. It also sets the minimum height to 4 blocks. I think that 
+                    //might be useful to set the block as water when max_Height == 4
+                    if (max_Height >= CHUNK_SIZE) {
+                        max_Height = CHUNK_SIZE;
+                    } else if (max_Height < 4) {
+                        //AMADOR: If you comment this out, you will see holes in the map.
+                        max_Height = 4;
                     }
 
+                    setBlockType(max_Height, x, y, z);
                     VertexPositionData.put(createCube((float) (startX + x * CUBE_LENGTH),
                             (float) (y * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) (startZ + z * CUBE_LENGTH)));
@@ -165,6 +138,26 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    private void setBlockType(int max_Height, int x, int y, int z) {
+        if (y == 0) {
+            blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
+        } else if (max_Height == 4 && y < 4) {
+            blocks[x][y][z].setBlockType(Block.BlockType.Water);
+        } else if (max_Height == 5 && y < 5) {
+            blocks[x][y][z].setBlockType(Block.BlockType.Sand);
+        } else if (y == max_Height || y == max_Height - 1) {
+            blocks[x][y][z].setBlockType(Block.BlockType.Grass);
+        } else if (max_Height >= 6 && y <= 3) {
+            blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
+        } else if (max_Height >= 6 && y < max_Height - 1) {
+            if (r.nextDouble() < 0.8) {
+                blocks[x][y][z].setBlockType(Block.BlockType.Dirt);
+            } else {
+                blocks[x][y][z].setBlockType(Block.BlockType.Stone);
+            }
+        }
     }
 
     private float[] createCubeVertexCol(float[] CubeColorArray) {
@@ -212,21 +205,13 @@ public class Chunk {
     }
 
     private float[] getCubeColor(Block block) {
-        /*switch (block.getID()) {
-            case 1:
-                return new float[]{0, 1, 0};
-            case 2:
-                return new float[]{1, 0.5f, 0};
-            case 3:
-                return new float[]{0, 0f, 1f};
-         }*/
         return new float[]{1, 1, 1};
     }
 
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f / 16) / 1024f;
         Block.BlockType temp = block.getBlockType();
-                switch (temp) {
+        switch (temp) {
             case Grass:
                 return new float[]{
                     // BOTTOM QUAD(DOWN=+Y)
