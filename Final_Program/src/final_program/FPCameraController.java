@@ -5,6 +5,8 @@
  */
 package final_program;
 
+import java.util.ArrayList;
+import java.util.Random;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -17,11 +19,10 @@ import org.lwjgl.Sys;
  * @author Amador
  */
 public class FPCameraController {
-
-    private final float WORLD_SIZE = 125f;
+    private final int NUM_OF_CHUNKS = 4; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
-    private Chunk chunk;
+    private ArrayList<Chunk> chunks;
 
     //3d vector to store the camera's position in
     private Vector3f position = null;
@@ -35,11 +36,25 @@ public class FPCameraController {
     private Vector3Float me;
 
     public FPCameraController(float x, float y, float z) {
-        chunk = new Chunk(10, 10, 10);
+        chunks = new ArrayList<>();
+        Random r = new Random();
+        int noise_Seed = r.nextInt();
+        
+        //AMADOR: This is where I get the seed to be used the the Chunk SimplexNoise object.
+        System.out.println("Seed: " + noise_Seed);
+
+        //Generates an array of Chunks. The i and k values are sort of like the key for the chunk. It
+        //tells the Chunk rebuildMesh method which chunk it is and its position in the world.
+        for (int i = 0; i < NUM_OF_CHUNKS; i++) {
+            for (int k = 0; k < NUM_OF_CHUNKS; k++) {
+                chunks.add(new Chunk(i, 10, k, noise_Seed));
+            }
+        }
+
         position = new Vector3f(x, y, z);
         lPosition = new Vector3f(x, y, z);
         lPosition.x = 0f;
-        lPosition.y = 15f;
+        lPosition.y = 0f;
         lPosition.z = 0f;
     }
 
@@ -117,7 +132,7 @@ public class FPCameraController {
         float lastTime = 0.0f; //length of frame
         long time = 0;
         float mouseSensitivity = 0.09f;
-        float movementSpeed = 0.35f;
+        float movementSpeed = 0.75f;
 
         //hide the mouse
         Mouse.setGrabbed(true);
@@ -166,75 +181,17 @@ public class FPCameraController {
             camera.lookThrough();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             //you would draw your scene here.
-            glTranslatef(40f, -130f, 0f);
-            glRotatef(175f, 0f, 1f, 0f);
-            
-            chunk.render();
-            //render();
+            glTranslatef(0f, -70f, 0f);
+            glRotatef(90f, 0f, 1f, 0f);
+
+            for (Chunk c : chunks) {
+                c.render();
+            }
+
             //draw the buffer to the screen
             Display.update();
             Display.sync(60);
         }
         Display.destroy();
-    }
-
-    private void render() {
-        try {
-            glBegin(GL_QUADS);
-            drawWorld();
-            glEnd();
-
-        } catch (Exception e) {
-        }
-    }
-
-    //method: drawWorld()
-    //purpose: Simply draws a large cube to act as the world.
-    //Some of the colors are kinda weird. I took some rgb colors from online and divided it by 255 to get
-    //the float values.
-    private void drawWorld() {
-
-        //Bottom Face
-        glColor3f((float) 153 / 255, (float) 217 / 255, (float) 234 / 255);
-        glVertex3f(WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
-
-        //Top Face
-        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
-        glVertex3f(WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
-
-        //Front Face
-        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
-        glVertex3f(WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
-
-        //Back Face
-        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
-        glVertex3f(WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
-
-        //Left face
-        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
-        glVertex3f(-WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(-WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
-
-        //Right Face
-        //glColor3f((float) 135 / 255, (float) 206 / 255, (float) 235 / 255);
-        glVertex3f(WORLD_SIZE, WORLD_SIZE, -WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, -WORLD_SIZE, WORLD_SIZE);
-        glVertex3f(WORLD_SIZE, -WORLD_SIZE, -WORLD_SIZE);
-
     }
 }

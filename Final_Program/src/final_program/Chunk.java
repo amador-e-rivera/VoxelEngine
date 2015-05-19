@@ -17,30 +17,32 @@ import org.newdawn.slick.util.ResourceLoader;
 
 public class Chunk {
 
-    static final int CHUNK_SIZE = 60; //AMADOR: Increased Chunk size to see the terrain a little better.
+    static final int CHUNK_SIZE = 32; //AMADOR: Increased Chunk size to see the terrain a little better.
     static final int CUBE_LENGTH = 2;
     private Block[][][] blocks;
     private int VBOVertexHandle;
     private int VBOColorHandle;
     private int VBOTextureHandle;
     private Texture texture;
-    private int StartX, StartY, StartZ;
+    private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
 
-    public Chunk(int startX, int startY, int startZ) {
+    public Chunk(int startX, int startY, int startZ, int noise_Seed) {
         try {
             texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("/textures/terrain.png"));
         } catch (Exception e) {
             System.out.print("ER-ROAR!");
         }
 
+        this.noise_Seed = noise_Seed;
         r = new Random();
+
         blocks = new Block[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
-                    blocks[x][y][z] = new Block(Block.BlockType.BedRock);
+                    blocks[x][y][z] = new Block(Block.BlockType.Grass);
                 }
             }
         }
@@ -70,16 +72,21 @@ public class Chunk {
         glPopMatrix();
     }
 
-    //AMADOR: Play with the mountain_Height, mountain_Width and persistance.
+    //method: rebuildMesh
+    //purpose: This method builds the mesh for a chunk. It determines which chunk is being worked by
+    //the startX, startY and startZ parameters. All chunks will most likely have the same startY,
+    //but the startX and startZ will change depending on the chunk.
     public void rebuildMesh(float startX, float startY, float startZ) {
-        int max_Height = CHUNK_SIZE; //AMADOR: Max height (y) for the current xz position. No need to change this.
+        int max_Height = (int)startY; //AMADOR: Max height (y) for the current xz position. No need to change this.
         int mountain_Height = 175; //AMADOR: Larger number makes the mountains steeper.
-        int mountain_Width = 90; //AMADOR: A smaller value gives more peaks and less wide mountains.
-        double persistance = 0.08; //AMADOR: Not sure how to describe this.
-        int i, j, k;
+        int mountain_Width = 100; //AMADOR: A smaller value gives more peaks and less wide mountains.
+        double persistance = 0.1; //AMADOR: Not sure how to describe this.
+        int i, j, k, x1, z1;
 
-        //AMADOR: I set the seed to use the random object for random map generation.
-        SimplexNoise noise = new SimplexNoise(mountain_Width, persistance, r.nextInt());
+        //AMADOR: The seed is now generated outside this class so that all chunks use the same seed.
+        //In order for the terrain to have smooth transitions between chunks, they all need ot use
+        //the same seed.
+        SimplexNoise noise = new SimplexNoise(mountain_Width, persistance, noise_Seed/*5*/);
 
         int bufferSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12;
 
@@ -91,18 +98,27 @@ public class Chunk {
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
 
-        for (int x = 0; x < CHUNK_SIZE; x += 1) {
-            for (int z = 0; z < CHUNK_SIZE; z += 1) {
+        //AMADOR: In order for the terrain to appear smooth between chunks, when one chunk is done being
+        //generated, then the next chunk needs to pick up (in terms of x & z) where the last chunk left off. 
+        //For example, if we are adding chunks along the x-axis, then the first chunk will
+        //go from x == 0 to x == CHUNK_SIZE - 1. The next chunk will start at x == CHUNK_SIZE to
+        //x == (CHUNK_SIZE * 2) - 1 and the third chunk will start at x == CHUNK_SIZE * 2 to 
+        //x == (CHUNK_SIZE * 3) - 1...etc. The same applies when adding chunks along the z-axis. This assures
+        //that when the max_Height is being calculated, the x and z values being passed to the noise algorithm
+        //create a smooth transition between chunks. At least thats the idea.
+        for (int x = CHUNK_SIZE * StartX; x < CHUNK_SIZE + (CHUNK_SIZE * StartX); x++) {
+            for (int z = CHUNK_SIZE * StartZ; z < CHUNK_SIZE + (CHUNK_SIZE * StartZ); z++) {
                 for (int y = 0; y < max_Height; y++) {
-                    //AMADOR: Casted CHUNK_SIZE to double, otherwsie the result of the division would be 0 and
-                    //the max_Height will not change.
-                    i = (int) (StartX + x * ((CHUNK_SIZE - StartX) / (double) CHUNK_SIZE));
-                    j = (int) (StartY + max_Height * ((CHUNK_SIZE - StartY) / (double) CHUNK_SIZE));
-                    k = (int) (StartZ + z * ((CHUNK_SIZE - StartZ) / (double) CHUNK_SIZE));
+                    i = (int) (StartX + x * ((StartX - CHUNK_SIZE) / (double) CHUNK_SIZE));
+                    j = (int) (StartY + y * ((StartY - CHUNK_SIZE) / (double) CHUNK_SIZE));
+                    k = (int) (StartZ + z * ((StartZ - CHUNK_SIZE) / (double) CHUNK_SIZE));
 
-                    //AMADOR: Dividing CUBE_LENGTH by 2 made the map look a lot better. It looks like this 
-                    //is where the mountain height is set. I set the variable mountain_Height to reflect that.
-                    max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k)) * (CUBE_LENGTH / 2));
+                    //AMADOR: I am testing this code since it still doesnt line up perfectly.
+                    i += StartX != 0 ? -(2 * StartX) : 0;
+                    k += StartZ != 0 ? -(2 * StartZ) : 0;
+
+                    max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k))
+                            * (CUBE_LENGTH / 2));
 
                     //AMADOR: Prevents height from being larger than the chunk size otherwise it throws an 
                     //array out of bounds error. It also sets the minimum height to 4 blocks. I think that 
@@ -110,17 +126,35 @@ public class Chunk {
                     if (max_Height >= CHUNK_SIZE) {
                         max_Height = CHUNK_SIZE;
                     } else if (max_Height < 4) {
-                        //AMADOR: If you comment this out, you will see holes in the map.
                         max_Height = 4;
                     }
 
-                    setBlockType(max_Height, x, y, z);
-                    VertexPositionData.put(createCube((float) (startX + x * CUBE_LENGTH),
-                            (float) (y * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
-                            (float) (startZ + z * CUBE_LENGTH)));
-                    VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x][y][z])));
-                    VertexTextureData.put(createTexCube((float) 0, (float) 0,
-                            blocks[x][y][z]));
+                    //AMADOR: I was receiving ArrayIndexOutofBoundsException when I realized that the values
+                    //of x and z are only supposed to be used for the noise algorithm for smooth chunk 
+                    //transitions. The actual blocks array still only has a size of CHUNK_SIZE, therefore, in
+                    //order to reference a block in the blocks array, I had to use the modulus operator to
+                    //get the approriate block xz coordinates.
+                    x1 = x % CHUNK_SIZE;
+                    z1 = z % CHUNK_SIZE;
+
+                    setBlockType(max_Height, x1, y, z1);
+                    VertexPositionData.put(
+                            createCube(
+                                    (float) ((StartX * CHUNK_SIZE * 2) + x1 * CUBE_LENGTH),
+                                    (float) (y * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                    (float) ((StartZ * CHUNK_SIZE * 2) + z1 * CUBE_LENGTH))
+                    );
+
+                    //Highlights chunk perimeter
+                    /*
+                    if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
+                        VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
+                    } else {
+                        VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+                    }
+                    */
+                    VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+                    VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1]));
                 }
             }
         }
@@ -205,7 +239,7 @@ public class Chunk {
     }
 
     private float[] getCubeColor(Block block) {
-        return new float[]{1, 1, 1};
+        return new float[]{1, 0, 0};
     }
 
     public static float[] createTexCube(float x, float y, Block block) {
