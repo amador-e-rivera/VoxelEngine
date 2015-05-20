@@ -24,6 +24,7 @@ public class Chunk {
     private int VBOColorHandle;
     private int VBOTextureHandle;
     private Texture texture;
+    private FloatBuffer NormalsBuffer;
     private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
 
@@ -58,6 +59,10 @@ public class Chunk {
     }
 
     public void render() {
+        //AMADOR: Used the following 2 commands to render the lighting on the chunk.
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glNormalPointer(0, NormalsBuffer);
+
         glPushMatrix();
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glVertexPointer(3, GL_FLOAT, 0, 0L);
@@ -77,16 +82,16 @@ public class Chunk {
     //the startX, startY and startZ parameters. All chunks will most likely have the same startY,
     //but the startX and startZ will change depending on the chunk.
     public void rebuildMesh(float startX, float startY, float startZ) {
-        int max_Height = (int)startY; //AMADOR: Max height (y) for the current xz position. No need to change this.
+        int max_Height = (int) startY; //AMADOR: Max height (y) for the current xz position. No need to change this.
         int mountain_Height = 175; //AMADOR: Larger number makes the mountains steeper.
         int mountain_Width = 100; //AMADOR: A smaller value gives more peaks and less wide mountains.
-        double persistance = 0.1; //AMADOR: Not sure how to describe this.
+        double persistance = 0.09; //AMADOR: Not sure how to describe this.
         int i, j, k, x1, z1;
 
         //AMADOR: The seed is now generated outside this class so that all chunks use the same seed.
         //In order for the terrain to have smooth transitions between chunks, they all need ot use
         //the same seed.
-        SimplexNoise noise = new SimplexNoise(mountain_Width, persistance, noise_Seed/*5*/);
+        SimplexNoise noise = new SimplexNoise(mountain_Width, persistance, noise_Seed);
 
         int bufferSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12;
 
@@ -97,6 +102,7 @@ public class Chunk {
         FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
+        NormalsBuffer = BufferUtils.createFloatBuffer(bufferSize);
 
         //AMADOR: In order for the terrain to appear smooth between chunks, when one chunk is done being
         //generated, then the next chunk needs to pick up (in terms of x & z) where the last chunk left off. 
@@ -115,10 +121,14 @@ public class Chunk {
 
                     //AMADOR: I am testing this code since it still doesnt line up perfectly.
                     i += StartX != 0 ? -(2 * StartX) : 0;
-                    k += StartZ != 0 ? -(2 * StartZ) : 0;
+                    k += StartZ != 0 ? -(3 * StartZ) : 0;
 
-                    max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k))
-                            * (CUBE_LENGTH / 2));
+                    //AMADOR: Added this if statement to prevent the max_Height from changing after it is
+                    //initialized for each xz coordinate.
+                    if (y == 0) {
+                        max_Height = (StartY + (int) (mountain_Height * noise.getNoise(i, j, k))
+                                * (CUBE_LENGTH / 2));
+                    }
 
                     //AMADOR: Prevents height from being larger than the chunk size otherwise it throws an 
                     //array out of bounds error. It also sets the minimum height to 4 blocks. I think that 
@@ -146,14 +156,13 @@ public class Chunk {
                     );
 
                     //Highlights chunk perimeter
-                    /*
                     if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
                         VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
                     } else {
                         VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     }
-                    */
-                    VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+
+                    //VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1]));
                 }
             }
@@ -172,6 +181,8 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        normalize_Vertices(VertexPositionData, NormalsBuffer);
     }
 
     private void setBlockType(int max_Height, int x, int y, int z) {
@@ -186,12 +197,37 @@ public class Chunk {
         } else if (max_Height >= 6 && y <= 3) {
             blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
         } else if (max_Height >= 6 && y < max_Height - 1) {
-            if (r.nextDouble() < 0.8) {
+            if (r.nextDouble() < 0.75) {
                 blocks[x][y][z].setBlockType(Block.BlockType.Dirt);
             } else {
                 blocks[x][y][z].setBlockType(Block.BlockType.Stone);
             }
         }
+    }
+
+    private void normalize_Vertices(FloatBuffer vertices, FloatBuffer normals) {
+        float v1, v2, v3, v4, length;
+
+        for (int i = 0; i < vertices.limit(); i += 4) {
+            v1 = vertices.get(i);
+            v2 = vertices.get(i + 1);
+            v3 = vertices.get(i + 2);
+            v4 = vertices.get(i + 3);
+
+            length = (float) Math.sqrt((v1 * v1) + (v2 * v2) + (v3 * v3) + (v4 * v4));
+
+            v1 = v1 / length;
+            v2 = v2 / length;
+            v3 = v3 / length;
+            v4 = v4 / length;
+
+            normals.put(i, v1);
+            normals.put(i + 1, v2);
+            normals.put(i + 2, v3);
+            normals.put(i + 3, v4);
+        }
+
+        normals.flip();
     }
 
     private float[] createCubeVertexCol(float[] CubeColorArray) {
@@ -239,7 +275,7 @@ public class Chunk {
     }
 
     private float[] getCubeColor(Block block) {
-        return new float[]{1, 0, 0};
+        return new float[]{1f, 0.5f, 0.5f};
     }
 
     public static float[] createTexCube(float x, float y, Block block) {

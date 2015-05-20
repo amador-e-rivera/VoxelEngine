@@ -5,8 +5,10 @@
  */
 package final_program;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Random;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -19,10 +21,12 @@ import org.lwjgl.Sys;
  * @author Amador
  */
 public class FPCameraController {
-    private final int NUM_OF_CHUNKS = 4; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
+
+    private final int NUM_OF_CHUNKS = 3; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
     private ArrayList<Chunk> chunks;
+    private int noise_Seed;
 
     //3d vector to store the camera's position in
     private Vector3f position = null;
@@ -33,24 +37,8 @@ public class FPCameraController {
 
     //The rotation around the X axis of the camera
     private float pitch = 0.0f;
-    private Vector3Float me;
 
     public FPCameraController(float x, float y, float z) {
-        chunks = new ArrayList<>();
-        Random r = new Random();
-        int noise_Seed = r.nextInt();
-        
-        //AMADOR: This is where I get the seed to be used the the Chunk SimplexNoise object.
-        System.out.println("Seed: " + noise_Seed);
-
-        //Generates an array of Chunks. The i and k values are sort of like the key for the chunk. It
-        //tells the Chunk rebuildMesh method which chunk it is and its position in the world.
-        for (int i = 0; i < NUM_OF_CHUNKS; i++) {
-            for (int k = 0; k < NUM_OF_CHUNKS; k++) {
-                chunks.add(new Chunk(i, 10, k, noise_Seed));
-            }
-        }
-
         position = new Vector3f(x, y, z);
         lPosition = new Vector3f(x, y, z);
         lPosition.x = 0f;
@@ -73,6 +61,8 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw));
 
+        updateLight(xOffset, zOffset);
+
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -81,6 +71,8 @@ public class FPCameraController {
     public void walkBackwards(float distance) {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw));
+
+        updateLight(xOffset, zOffset);
 
         position.x += xOffset;
         position.z -= zOffset;
@@ -91,6 +83,8 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw - 90));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw - 90));
 
+        updateLight(xOffset, zOffset);
+
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -99,6 +93,8 @@ public class FPCameraController {
     public void strafeRight(float distance) {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw + 90));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw + 90));
+
+        updateLight(xOffset, zOffset);
 
         position.x -= xOffset;
         position.z += zOffset;
@@ -122,6 +118,16 @@ public class FPCameraController {
         glRotatef(yaw, 0.0f, 1.0f, 0.0f);
         //Rranslate to the position vectors location
         glTranslatef(position.x, position.y, position.z);
+
+        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        lightPosition.put(-position.x + 50).put(-position.y).put(-position.z - 50).put(1.0f).flip();
+        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+    }
+
+    public void updateLight(float xOffset, float zOffset) {
+        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        lightPosition.put(lPosition.x -= xOffset).put(lPosition.y).put(lPosition.z += zOffset).put(1.0f).flip();
+        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void gameLoop() {
@@ -133,6 +139,21 @@ public class FPCameraController {
         long time = 0;
         float mouseSensitivity = 0.09f;
         float movementSpeed = 0.75f;
+
+        //AMADOR: This is where I get the seed to be used the the Chunk SimplexNoise object.
+        Random r = new Random();
+        noise_Seed = r.nextInt();//-1049537650, -1807078236;//r.nextInt();
+        System.out.println("Seed: " + noise_Seed);
+
+        //Generates an array of Chunks. The i and k values are sort of like the key for the chunk. It
+        //tells the Chunk rebuildMesh method which chunk it is and its position in the world.
+        chunks = new ArrayList<>();
+        
+        for (int i = 0; i < NUM_OF_CHUNKS; i++) {
+            for (int k = 0; k < NUM_OF_CHUNKS; k++) {
+                chunks.add(new Chunk(i, 15, k, noise_Seed));
+            }
+        }
 
         //hide the mouse
         Mouse.setGrabbed(true);
