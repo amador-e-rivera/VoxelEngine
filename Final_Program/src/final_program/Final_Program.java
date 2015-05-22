@@ -64,7 +64,7 @@ public class Final_Program {
         glEnable(GL_TEXTURE_2D);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-        initLightArrays();
+        //initLightArrays();
         initFog();
 
         glMatrixMode(GL_PROJECTION);
@@ -79,7 +79,7 @@ public class Final_Program {
         lightPosition = BufferUtils.createFloatBuffer(4);
         whiteLight = BufferUtils.createFloatBuffer(4);
 
-        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+        lightPosition.put(0.0f).put(0f).put(0f).put(0.0f).flip();
         whiteLight.put(1f).put(1f).put(0.5f).put(0.0f).flip();
 
         glLightModel(GL_2D, whiteLight);

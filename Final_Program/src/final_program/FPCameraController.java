@@ -22,7 +22,7 @@ import org.lwjgl.Sys;
  */
 public class FPCameraController {
 
-    private final int NUM_OF_CHUNKS = 3; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
+    private final int NUM_OF_CHUNKS = 4; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
     private ArrayList<Chunk> chunks;
@@ -61,7 +61,7 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw));
 
-        updateLight(xOffset, zOffset);
+        //updateLight(xOffset, zOffset);
 
         position.x -= xOffset;
         position.z += zOffset;
@@ -72,8 +72,7 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw));
 
-        updateLight(xOffset, zOffset);
-
+        //updateLight(xOffset, zOffset);
         position.x += xOffset;
         position.z -= zOffset;
     }
@@ -83,8 +82,7 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw - 90));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw - 90));
 
-        updateLight(xOffset, zOffset);
-
+        //updateLight(xOffset, zOffset);
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -94,8 +92,7 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw + 90));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw + 90));
 
-        updateLight(xOffset, zOffset);
-
+        //updateLight(xOffset, zOffset);
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -119,19 +116,23 @@ public class FPCameraController {
         //Rranslate to the position vectors location
         glTranslatef(position.x, position.y, position.z);
 
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(-position.x + 50).put(-position.y).put(-position.z - 50).put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(-position.x + 50).put(-position.y).put(-position.z - 50).put(1.0f).flip();
+        //lightPosition.put(0f).put(-1f).put(-0.75f).put(0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void updateLight(float xOffset, float zOffset) {
         FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(lPosition.x -= xOffset).put(lPosition.y).put(lPosition.z += zOffset).put(1.0f).flip();
+        lightPosition.put(lPosition.x -= xOffset).put(lPosition.y).put(lPosition.z += zOffset).put(0.0f).flip();
         glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void gameLoop() {
         FPCameraController camera = new FPCameraController(0, 0, 0);
+        Crosshair crossHair = new Crosshair(-position.x, -position.y, position.z);
+        Player player = new Player(-position.x, -position.y, position.z);
+
         float dx = 0f;
         float dy = 0f;
         float dz = 0f;
@@ -148,7 +149,7 @@ public class FPCameraController {
         //Generates an array of Chunks. The i and k values are sort of like the key for the chunk. It
         //tells the Chunk rebuildMesh method which chunk it is and its position in the world.
         chunks = new ArrayList<>();
-        
+
         for (int i = 0; i < NUM_OF_CHUNKS; i++) {
             for (int k = 0; k < NUM_OF_CHUNKS; k++) {
                 chunks.add(new Chunk(i, 15, k, noise_Seed));
@@ -158,10 +159,18 @@ public class FPCameraController {
         //hide the mouse
         Mouse.setGrabbed(true);
 
+        time = Sys.getTime();
+
         //keep looping until the dipslay window is closed or ESC is pressed
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-            time = Sys.getTime();
-            lastTime = time;
+
+            if (Sys.getTime() - time > 250) {
+                time = Sys.getTime();
+                System.out.println(
+                        "Chunk " + (int) (Math.abs(camera.position.x)/(2 * Chunk.CHUNK_SIZE)) + ","
+                        + (int)(Math.abs(camera.position.z)/(2 * Chunk.CHUNK_SIZE)) + " "
+                        + "(x:" + camera.position.x + " z:" + camera.position.z + ")");
+            }
 
             //distance in mouse movement
             dx = Mouse.getDX();
@@ -175,6 +184,15 @@ public class FPCameraController {
             //When passing in the distance to move we times the movementSpeedwith dtthis is a time scale
             //so if its a slow frame u move more then a fast frame so on a slow computer you move just as 
             //fast as on a fast computer
+            if (Mouse.hasWheel()) {
+                int wheel = Mouse.getDWheel();
+                if (wheel < 0) {
+                    player.updateBlockType(-1);
+                } else if (wheel > 0) {
+                    player.updateBlockType(1);
+                }
+
+            }
             if (Keyboard.isKeyDown(Keyboard.KEY_W))//move forward
             {
                 camera.walkForward(movementSpeed);
@@ -200,10 +218,15 @@ public class FPCameraController {
             glLoadIdentity();
             //look through the camera before you draw anything
             camera.lookThrough();
+            
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            //you would draw your scene here.
-            glTranslatef(0f, -70f, 0f);
+            //glTranslatef(-(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS), -70f, -(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS)); //Centers you in terrain
             glRotatef(90f, 0f, 1f, 0f);
+            glTranslatef(0f, -70f, 0f);
+            //glTranslatef(-(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS), -70f, -(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS)); //Centers you in terrain
+            
+            player.render();
+            crossHair.render();
 
             for (Chunk c : chunks) {
                 c.render();

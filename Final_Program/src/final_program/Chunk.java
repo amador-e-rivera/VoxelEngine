@@ -156,6 +156,7 @@ public class Chunk {
                     );
 
                     //Highlights chunk perimeter
+                    
                     if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
                         VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
                     } else {
@@ -280,8 +281,8 @@ public class Chunk {
 
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f / 16) / 1024f;
-        Block.BlockType temp = block.getBlockType();
-        switch (temp) {
+        
+        switch (block.getBlockType()) {
             case Grass:
                 return new float[]{
                     // BOTTOM QUAD(DOWN=+Y)

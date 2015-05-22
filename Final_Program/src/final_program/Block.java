@@ -13,7 +13,6 @@ public class Block {
 
     private BlockType blockType;
     private boolean active;
-    private float x, y, z;
 
     public enum BlockType {
 
@@ -45,12 +44,6 @@ public class Block {
 
     public Block(BlockType blockType) {
         this.blockType = blockType;
-    }
-    
-    public void setCoords(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
     }
 
     public void setActive(boolean active) {
