@@ -65,7 +65,7 @@ public class Final_Program {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
         //initLightArrays();
-        initFog();
+        //initFog();
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
