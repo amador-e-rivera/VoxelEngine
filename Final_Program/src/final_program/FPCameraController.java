@@ -145,15 +145,6 @@ public class FPCameraController {
 
         //keep looping until the dipslay window is closed or ESC is pressed
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-
-            if (Sys.getTime() - time > 250) {
-                time = Sys.getTime();
-                System.out.println(
-                        "Chunk " + (int) (Math.abs(camera.position.x) / (2 * Chunk.CHUNK_SIZE)) + ","
-                        + (int) (Math.abs(camera.position.z) / (2 * Chunk.CHUNK_SIZE)) + " "
-                        + "(x:" + camera.position.x + " z:" + camera.position.z + ")");
-            }
-
             //distance in mouse movement
             dx = Mouse.getDX();
             dy = Mouse.getDY();
