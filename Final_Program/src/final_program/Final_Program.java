@@ -5,8 +5,6 @@
  */
 package final_program;
 
-import java.nio.FloatBuffer;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
@@ -21,15 +19,12 @@ public class Final_Program {
     private FPCameraController fp;
     private DisplayMode displayMode;
 
-    private FloatBuffer lightPosition;
-    private FloatBuffer whiteLight;
-
     public void start() {
         try {
             createWindow();
             initGL();
             fp = new FPCameraController(0f, 0f, 0f);
-            fp.gameLoop();
+            fp.gameLoop(); //render();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -55,7 +50,6 @@ public class Final_Program {
         glClearColor(0.55f, 0.65f, 1.0f, 0.0f);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -64,43 +58,12 @@ public class Final_Program {
         glEnable(GL_TEXTURE_2D);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-        //initLightArrays();
-        //initFog();
-
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         GLU.gluPerspective(100.0f, (float) displayMode.getWidth()
-                / (float) displayMode.getHeight(), 0.1f, 200.0f);
+                / (float) displayMode.getHeight(), 0.1f, 300.0f);
         glMatrixMode(GL_MODELVIEW);
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    }
-
-    private void initLightArrays() {
-        lightPosition = BufferUtils.createFloatBuffer(4);
-        whiteLight = BufferUtils.createFloatBuffer(4);
-
-        lightPosition.put(0.0f).put(0f).put(0f).put(0.0f).flip();
-        whiteLight.put(1f).put(1f).put(0.5f).put(0.0f).flip();
-
-        glLightModel(GL_2D, whiteLight);
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition); //sets our light’s position
-        glLight(GL_LIGHT0, GL_SPECULAR, whiteLight);//sets our specular light
-        glLight(GL_LIGHT0, GL_DIFFUSE, whiteLight);//sets our diffuse light
-        glLight(GL_LIGHT0, GL_AMBIENT, whiteLight);//sets our ambient light
-        glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 1f);
-        glEnable(GL_LIGHTING);//enables our lighting
-        glEnable(GL_LIGHT0);//enables light0
-    }
-
-    private void initFog() {
-        FloatBuffer fog_Color = BufferUtils.createFloatBuffer(4);
-        fog_Color.put(0.5f).put(0.5f).put(0.5f).put(1f);
-        fog_Color.flip(); //AMADOR: Had to flip the buffer otherwise it throws an error.
-
-        glEnable(GL_FOG);
-        glFogi(GL_FOG_MODE, GL_EXP2);
-        glFog(GL_FOG_COLOR, fog_Color);
-        glFogf(GL_FOG_DENSITY, 0.0075f);
     }
 
     /**

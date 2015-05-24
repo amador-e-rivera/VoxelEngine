@@ -5,10 +5,8 @@
  */
 package final_program;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Random;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -61,8 +59,6 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw));
 
-        //updateLight(xOffset, zOffset);
-
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -72,7 +68,6 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw));
 
-        //updateLight(xOffset, zOffset);
         position.x += xOffset;
         position.z -= zOffset;
     }
@@ -82,7 +77,6 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw - 90));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw - 90));
 
-        //updateLight(xOffset, zOffset);
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -92,7 +86,6 @@ public class FPCameraController {
         float xOffset = distance * (float) Math.sin(Math.toRadians(yaw + 90));
         float zOffset = distance * (float) Math.cos(Math.toRadians(yaw + 90));
 
-        //updateLight(xOffset, zOffset);
         position.x -= xOffset;
         position.z += zOffset;
     }
@@ -115,17 +108,6 @@ public class FPCameraController {
         glRotatef(yaw, 0.0f, 1.0f, 0.0f);
         //Rranslate to the position vectors location
         glTranslatef(position.x, position.y, position.z);
-
-        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        //lightPosition.put(-position.x + 50).put(-position.y).put(-position.z - 50).put(1.0f).flip();
-        //lightPosition.put(0f).put(-1f).put(-0.75f).put(0f).flip();
-        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
-    }
-
-    public void updateLight(float xOffset, float zOffset) {
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(lPosition.x -= xOffset).put(lPosition.y).put(lPosition.z += zOffset).put(0.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void gameLoop() {
@@ -167,8 +149,8 @@ public class FPCameraController {
             if (Sys.getTime() - time > 250) {
                 time = Sys.getTime();
                 System.out.println(
-                        "Chunk " + (int) (Math.abs(camera.position.x)/(2 * Chunk.CHUNK_SIZE)) + ","
-                        + (int)(Math.abs(camera.position.z)/(2 * Chunk.CHUNK_SIZE)) + " "
+                        "Chunk " + (int) (Math.abs(camera.position.x) / (2 * Chunk.CHUNK_SIZE)) + ","
+                        + (int) (Math.abs(camera.position.z) / (2 * Chunk.CHUNK_SIZE)) + " "
                         + "(x:" + camera.position.x + " z:" + camera.position.z + ")");
             }
 
@@ -218,13 +200,12 @@ public class FPCameraController {
             glLoadIdentity();
             //look through the camera before you draw anything
             camera.lookThrough();
-            
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            //glTranslatef(-(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS), -70f, -(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS)); //Centers you in terrain
-            glRotatef(90f, 0f, 1f, 0f);
+            glRotatef(135f, 0f, 1f, 0f);
             glTranslatef(0f, -70f, 0f);
             //glTranslatef(-(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS), -70f, -(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS)); //Centers you in terrain
-            
+
             player.render();
             crossHair.render();
 
