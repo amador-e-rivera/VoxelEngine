@@ -26,6 +26,8 @@ public class Chunk {
     private Texture texture;
     private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
+    FloatBuffer VertexTextureData;
+    FloatBuffer VertexPositionData;
 
     public Chunk(int startX, int startY, int startZ, int noise_Seed) {
         try {
@@ -94,9 +96,9 @@ public class Chunk {
         VBOVertexHandle = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
 
-        FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
+        VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
-        FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
+        VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
 
         //AMADOR: In order for the terrain to appear smooth between chunks, when one chunk is done being
         //generated, then the next chunk needs to pick up (in terms of x & z) where the last chunk left off. 
@@ -158,7 +160,7 @@ public class Chunk {
                     }
 
                     //VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-                    VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1]));
+                    VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1].getBlockType()));
                 }
             }
         }
@@ -179,6 +181,7 @@ public class Chunk {
     }
 
     private void setBlockType(int max_Height, int x, int y, int z) {
+        
         if (y == 0) {
             blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
         } else if (max_Height == 4 && y < 4) {
@@ -187,6 +190,9 @@ public class Chunk {
             blocks[x][y][z].setBlockType(Block.BlockType.Sand);
         } else if (y == max_Height || y == max_Height - 1) {
             blocks[x][y][z].setBlockType(Block.BlockType.Grass);
+            
+            SpawnTree(x,y,z,1);
+
         } else if (max_Height >= 6 && y <= 3) {
             blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
         } else if (max_Height >= 6 && y < max_Height - 1) {
@@ -196,6 +202,112 @@ public class Chunk {
                 blocks[x][y][z].setBlockType(Block.BlockType.Stone);
             }
         }
+    }
+    
+    //Preston: Returns true if spawns a tree, must give percentage 0 to 100 on odds of spawning a tree
+    private boolean SpawnTree(int x, int y, int z, int percentToSpawn){
+        
+        if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8){
+            blocks[x][y][z].setBlockType(Block.BlockType.Wood);
+            
+
+            //TODO Set up more econimical way to store tree data
+            
+            for (int i = 1; i < 6; i++){
+                VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Wood));
+                VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                                (float) ((y+i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+                );
+            }
+            
+    
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + (z+1) * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + (z-1) * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                                (float) ((y+7) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + (x + 1) * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + (x + 1) * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + (z - 1) * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + (x + 1) * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + (z + 1) * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + (x - 1) * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + (x - 1) * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + (z - 1) * CUBE_LENGTH))
+                );
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + (x - 1) * CUBE_LENGTH),
+                                (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + (z + 1) * CUBE_LENGTH))
+                );
+
+            return true;
+        } 
+        
+        return false; //No tree spawned
     }
 
     private float[] createCubeVertexCol(float[] CubeColorArray) {
@@ -246,10 +358,10 @@ public class Chunk {
         return new float[]{1, 0.5f, 0.5f};
     }
 
-    public static float[] createTexCube(float x, float y, Block block) {
+    public static float[] createTexCube(float x, float y, Block.BlockType blockType) {
         float offset = (1024f / 16) / 1024f;
-        Block.BlockType temp = block.getBlockType();
-        switch (temp) {
+        //Block.BlockType temp = block.getBlockType();
+        switch (blockType) {
             case Grass:
                 return new float[]{
                     // BOTTOM QUAD(DOWN=+Y)

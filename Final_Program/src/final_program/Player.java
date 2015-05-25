@@ -22,7 +22,7 @@ public class Player {
     public Player(float x, float y, float z) {
         block = new Block(Block.BlockType.Grass);
         vertices = Chunk.createCube(x - 2, y - 3, z - 1);
-        tex = Chunk.createTexCube(0, 0, block);
+        tex = Chunk.createTexCube(0, 0, block.getBlockType());
 
         blocks = new LinkedList<>();
 
@@ -43,7 +43,7 @@ public class Player {
             blocks.addFirst(blocks.pollLast());
             block = new Block(blocks.peekFirst());
         }
-        tex = Chunk.createTexCube(0, 0, block);
+        tex = Chunk.createTexCube(0, 0, block.getBlockType());
     }
 
     public void render() {
