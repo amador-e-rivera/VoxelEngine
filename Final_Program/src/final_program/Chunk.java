@@ -189,7 +189,10 @@ public class Chunk {
             blocks[x][y][z].setBlockType(Block.BlockType.Sand);
             SpawnCacti(x,y,z,1);
         } else if (y == max_Height || y == max_Height - 1) {
-            blocks[x][y][z].setBlockType(Block.BlockType.Grass);
+            if (y > CHUNK_SIZE - 7)
+                blocks[x][y][z].setBlockType(Block.BlockType.Snow);
+            else
+                blocks[x][y][z].setBlockType(Block.BlockType.Grass);
             
             SpawnTree(x,y,z,1);
 
@@ -691,6 +694,39 @@ public class Chunk {
                     x + offset * 6, y + offset * 4,
                     x + offset * 6, y + offset * 5,
                     x + offset * 5, y + offset * 5
+                };
+            case Snow:
+                return new float[]{
+                    // BOTTOM QUAD(DOWN=+Y)
+                    x + offset * 2, y + offset * 2,
+                    x + offset * 1, y + offset * 2,
+                    x + offset * 1, y + offset * 1,
+                    x + offset * 2, y + offset * 1,
+                    // TOP!
+                    x + offset * 2, y + offset * 2,
+                    x + offset * 1, y + offset * 2,
+                    x + offset * 1, y + offset * 1,
+                    x + offset * 2, y + offset * 1,
+                    // FRONT QUAD
+                    x + offset * 15, y + offset * 3,
+                    x + offset * 16, y + offset * 3,
+                    x + offset * 16, y + offset * 4,
+                    x + offset * 15, y + offset * 4,
+                    // BACK QUAD
+                    x + offset * 16, y + offset * 4,
+                    x + offset * 15, y + offset * 4,
+                    x + offset * 15, y + offset * 3,
+                    x + offset * 16, y + offset * 3,
+                    // LEFT QUAD
+                    x + offset * 15, y + offset * 3,
+                    x + offset * 16, y + offset * 3,
+                    x + offset * 16, y + offset * 4,
+                    x + offset * 15, y + offset * 4,
+                    // RIGHT QUAD
+                    x + offset * 15, y + offset * 3,
+                    x + offset * 16, y + offset * 3,
+                    x + offset * 16, y + offset * 4,
+                    x + offset * 15, y + offset * 4
                 };
             default: // Currently default is grass, recommend making default to dirt in the future
                 return new float[]{

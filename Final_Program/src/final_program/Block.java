@@ -24,7 +24,8 @@ public class Block {
         Sand(5),
         Wood(6),
         Leaf(7),
-        Cacti(8);
+        Cacti(8),
+        Snow(9);
 
         private int blockID;
 
