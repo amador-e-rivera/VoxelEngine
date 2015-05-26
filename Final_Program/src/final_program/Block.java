@@ -22,7 +22,9 @@ public class Block {
         Water(3),
         BedRock(4),
         Sand(5),
-        Wood(6);
+        Wood(6),
+        Leaf(7),
+        Cacti(8);
 
         private int blockID;
 

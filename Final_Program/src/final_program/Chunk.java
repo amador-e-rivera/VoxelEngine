@@ -26,8 +26,7 @@ public class Chunk {
     private Texture texture;
     private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
-    FloatBuffer VertexTextureData;
-    FloatBuffer VertexPositionData;
+    FloatBuffer VertexTextureData, VertexPositionData, VertexColorData;
 
     public Chunk(int startX, int startY, int startZ, int noise_Seed) {
         try {
@@ -97,7 +96,7 @@ public class Chunk {
         VBOTextureHandle = glGenBuffers();
 
         VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
-        FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
+        VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
 
         //AMADOR: In order for the terrain to appear smooth between chunks, when one chunk is done being
@@ -188,6 +187,7 @@ public class Chunk {
             blocks[x][y][z].setBlockType(Block.BlockType.Water);
         } else if (max_Height == 5 && y < 5) {
             blocks[x][y][z].setBlockType(Block.BlockType.Sand);
+            SpawnCacti(x,y,z,1);
         } else if (y == max_Height || y == max_Height - 1) {
             blocks[x][y][z].setBlockType(Block.BlockType.Grass);
             
@@ -209,7 +209,6 @@ public class Chunk {
         
         if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8){
             blocks[x][y][z].setBlockType(Block.BlockType.Wood);
-            
 
             //TODO Set up more econimical way to store tree data
             
@@ -221,89 +220,123 @@ public class Chunk {
                                 (float) ((y+i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
+                VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             }
-            
     
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + (z+1) * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + (z-1) * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
                                 (float) ((y+7) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + (x + 1) * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + (x + 1) * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + (z - 1) * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + (x + 1) * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + (z + 1) * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + (x - 1) * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + (x - 1) * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + (z - 1) * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             
-            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + (x - 1) * CUBE_LENGTH),
                                 (float) ((y+6) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + (z + 1) * CUBE_LENGTH))
                 );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
 
+            return true;
+        } 
+        
+        return false; //No tree spawned
+    }
+    
+    private boolean SpawnCacti(int x, int y, int z, int percentToSpawn){
+        
+        if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8){
+            blocks[x][y][z].setBlockType(Block.BlockType.Cacti);
+
+            //TODO Set up more econimical way to store tree data
+            
+            for (int i = 1; i < 4; i++){
+                VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Cacti));
+                VertexPositionData.put(
+                        createCube(
+                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                                (float) ((y+i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+                );
+                VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+            }
+    
             return true;
         } 
         
@@ -592,6 +625,72 @@ public class Chunk {
                     x + offset * 5, y + offset * 1,
                     x + offset * 5, y + offset * 2,
                     x + offset * 4, y + offset * 2
+                };
+            case Leaf:
+                return new float[]{
+                    // BOTTOM QUAD(DOWN=+Y)
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 5, y + offset * 3,
+                    x + offset * 6, y + offset * 3,
+                    // TOP!
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 5, y + offset * 3,
+                    x + offset * 6, y + offset * 3,
+                    // FRONT QUAD
+                    x + offset * 4, y + offset * 3,
+                    x + offset * 5, y + offset * 3,
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 4, y + offset * 4,
+                    // BACK QUAD
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 4, y + offset * 4,
+                    x + offset * 4, y + offset * 3,
+                    x + offset * 5, y + offset * 3,
+                    // LEFT QUAD
+                    x + offset * 4, y + offset * 3,
+                    x + offset * 5, y + offset * 3,
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 4, y + offset * 4,
+                    // RIGHT QUAD
+                    x + offset * 4, y + offset * 3,
+                    x + offset * 5, y + offset * 3,
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 4, y + offset * 4
+                };
+            case Cacti:
+                return new float[]{
+                    // BOTTOM QUAD(DOWN=+Y)
+                    x + offset * 7, y + offset * 5,
+                    x + offset * 6, y + offset * 5,
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 7, y + offset * 4,
+                    // TOP!
+                    x + offset * 7, y + offset * 5,
+                    x + offset * 6, y + offset * 5,
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 7, y + offset * 4,
+                    // FRONT QUAD
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 6, y + offset * 5,
+                    x + offset * 5, y + offset * 5,
+                    // BACK QUAD
+                    x + offset * 6, y + offset * 5,
+                    x + offset * 5, y + offset * 5,
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 6, y + offset * 4,
+                    // LEFT QUAD
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 6, y + offset * 5,
+                    x + offset * 5, y + offset * 5,
+                    // RIGHT QUAD
+                    x + offset * 5, y + offset * 4,
+                    x + offset * 6, y + offset * 4,
+                    x + offset * 6, y + offset * 5,
+                    x + offset * 5, y + offset * 5
                 };
             default: // Currently default is grass, recommend making default to dirt in the future
                 return new float[]{
