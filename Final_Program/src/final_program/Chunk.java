@@ -151,13 +151,14 @@ public class Chunk {
                     );
 
                     //Highlights chunk perimeter
-                    
+                    /*
                     if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
                         VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
                     } else {
                         VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     }
-
+                            */
+VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     //VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1].getBlockType()));
                 }
@@ -184,15 +185,23 @@ public class Chunk {
         if (y == 0) {
             blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
         } else if (max_Height == 4 && y < 4) {
-            blocks[x][y][z].setBlockType(Block.BlockType.Water);
+            
+            if (r.nextInt(100) == 1){
+                blocks[x][y][z].setBlockType(Block.BlockType.Lily);
+            }else {
+                blocks[x][y][z].setBlockType(Block.BlockType.Water);
+            }
         } else if (max_Height == 5 && y < 5) {
             blocks[x][y][z].setBlockType(Block.BlockType.Sand);
             SpawnCacti(x,y,z,1);
         } else if (y == max_Height || y == max_Height - 1) {
-            if (y > CHUNK_SIZE - 7)
+            if (y > CHUNK_SIZE - 7){
                 blocks[x][y][z].setBlockType(Block.BlockType.Snow);
-            else
+                SpawnJackO(x,y,z, 10);
+            } else{
                 blocks[x][y][z].setBlockType(Block.BlockType.Grass);
+                SpawnPumkin(x,y,z,1);
+            }
             
             SpawnTree(x,y,z,1);
 
@@ -326,8 +335,6 @@ public class Chunk {
         
         if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8){
             blocks[x][y][z].setBlockType(Block.BlockType.Cacti);
-
-            //TODO Set up more econimical way to store tree data
             
             for (int i = 1; i < 4; i++){
                 VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Cacti));
@@ -344,6 +351,62 @@ public class Chunk {
         } 
         
         return false; //No tree spawned
+    }
+    
+    private boolean SpawnPumkin(int x, int y, int z, int percentToSpawn){
+        
+        if (r.nextInt(1000) < percentToSpawn && y < CHUNK_SIZE - 8){
+
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Pumkin));
+            VertexPositionData.put(
+                    createCube(
+                            (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                            (float) ((y+1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+            );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+    
+            return true;
+        } 
+        
+        return false; 
+    }
+    
+    private boolean SpawnJackO(int x, int y, int z, int percentToSpawn){
+        
+        if (r.nextInt(1000) < percentToSpawn && y < CHUNK_SIZE - 5){
+
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.JackO));
+            VertexPositionData.put(
+                    createCube(
+                            (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                            (float) ((y+3) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+            );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                    createCube(
+                            (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                            (float) ((y+2) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+            );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+            
+            VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
+            VertexPositionData.put(
+                    createCube(
+                            (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                            (float) ((y+1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+            );
+            VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+    
+            return true;
+        } 
+        
+        return false; 
     }
 
     private float[] createCubeVertexCol(float[] CubeColorArray) {
@@ -504,6 +567,39 @@ public class Chunk {
                     x + offset * 13, y + offset * 13,
                     x + offset * 13, y + offset * 12,
                     x + offset * 14, y + offset * 12,
+                    // TOP!
+                    x + offset * 14, y + offset * 13,
+                    x + offset * 13, y + offset * 13,
+                    x + offset * 13, y + offset * 12,
+                    x + offset * 14, y + offset * 12,
+                    // FRONT QUAD
+                    x + offset * 13, y + offset * 12,
+                    x + offset * 14, y + offset * 12,
+                    x + offset * 14, y + offset * 13,
+                    x + offset * 13, y + offset * 13,
+                    // BACK QUAD
+                    x + offset * 14, y + offset * 13,
+                    x + offset * 13, y + offset * 13,
+                    x + offset * 13, y + offset * 12,
+                    x + offset * 14, y + offset * 12,
+                    // LEFT QUAD
+                    x + offset * 13, y + offset * 12,
+                    x + offset * 14, y + offset * 12,
+                    x + offset * 14, y + offset * 13,
+                    x + offset * 13, y + offset * 13,
+                    // RIGHT QUAD
+                    x + offset * 13, y + offset * 12,
+                    x + offset * 14, y + offset * 12,
+                    x + offset * 14, y + offset * 13,
+                    x + offset * 13, y + offset * 13
+                };
+            case Lily:
+                return new float[]{
+                    // BOTTOM QUAD(DOWN=+Y)
+                    x + offset * 3, y + offset * 3,
+                    x + offset * 2, y + offset * 3,
+                    x + offset * 2, y + offset * 2,
+                    x + offset * 3, y + offset * 2,
                     // TOP!
                     x + offset * 14, y + offset * 13,
                     x + offset * 13, y + offset * 13,
@@ -727,6 +823,72 @@ public class Chunk {
                     x + offset * 16, y + offset * 3,
                     x + offset * 16, y + offset * 4,
                     x + offset * 15, y + offset * 4
+                };
+            case Pumkin:
+                return new float[]{
+                    // BOTTOM QUAD(DOWN=+Y)
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 14, y + offset * 6,
+                    x + offset * 14, y + offset * 7,
+                    x + offset * 13, y + offset * 7,
+                    // TOP!
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 14, y + offset * 6,
+                    x + offset * 14, y + offset * 7,
+                    x + offset * 13, y + offset * 7,
+                    // FRONT QUAD
+                    x + offset * 11, y + offset * 6,
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 12, y + offset * 7,
+                    x + offset * 11, y + offset * 7,
+                    // BACK QUAD
+                    x + offset * 13, y + offset * 7,
+                    x + offset * 12, y + offset * 7,
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 13, y + offset * 6,
+                    // LEFT QUAD
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 13, y + offset * 7,
+                    x + offset * 12, y + offset * 7,
+                    // RIGHT QUAD
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 13, y + offset * 7,
+                    x + offset * 12, y + offset * 7
+                };
+            case JackO:
+                return new float[]{
+                    // BOTTOM QUAD(DOWN=+Y)
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 14, y + offset * 6,
+                    x + offset * 14, y + offset * 7,
+                    x + offset * 13, y + offset * 7,
+                    // TOP!
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 14, y + offset * 6,
+                    x + offset * 14, y + offset * 7,
+                    x + offset * 13, y + offset * 7,
+                    // FRONT QUAD
+                    x + offset * 10, y + offset * 6,
+                    x + offset * 11, y + offset * 6,
+                    x + offset * 11, y + offset * 7,
+                    x + offset * 10, y + offset * 7,
+                    // BACK QUAD
+                    x + offset * 13, y + offset * 7,
+                    x + offset * 12, y + offset * 7,
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 13, y + offset * 6,
+                    // LEFT QUAD
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 13, y + offset * 7,
+                    x + offset * 12, y + offset * 7,
+                    // RIGHT QUAD
+                    x + offset * 12, y + offset * 6,
+                    x + offset * 13, y + offset * 6,
+                    x + offset * 13, y + offset * 7,
+                    x + offset * 12, y + offset * 7
                 };
             default: // Currently default is grass, recommend making default to dirt in the future
                 return new float[]{

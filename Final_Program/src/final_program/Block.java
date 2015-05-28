@@ -25,7 +25,10 @@ public class Block {
         Wood(6),
         Leaf(7),
         Cacti(8),
-        Snow(9);
+        Snow(9),
+        Lily(10),
+        Pumkin(11),
+        JackO(12);
 
         private int blockID;
 
