@@ -5,6 +5,8 @@
  */
 package final_program;
 
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
@@ -57,6 +59,8 @@ public class Final_Program {
 
         glEnable(GL_TEXTURE_2D);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        
+        initFog();
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -66,6 +70,17 @@ public class Final_Program {
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     }
 
+    private void initFog() {
+        FloatBuffer fog_Color = BufferUtils.createFloatBuffer(4);
+        fog_Color.put(0.5f).put(0.5f).put(0.5f).put(1f);
+        fog_Color.flip(); //AMADOR: Had to flip the buffer otherwise it throws an error.
+
+        glEnable(GL_FOG);
+        glFogi(GL_FOG_MODE, GL_EXP2);
+        glFog(GL_FOG_COLOR, fog_Color);
+        glFogf(GL_FOG_DENSITY, 0.0075f);
+    }
+    
     /**
      * @param args the command line arguments
      */
