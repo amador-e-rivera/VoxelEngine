@@ -355,8 +355,7 @@ public class Chunk {
         if (vertices != null) {
             selectedBlocks = new TreeMap<>();
             Vector3Float intersect_Point;
-            int block_Num = 0;
-            float distance = 0;
+            float distance = 0, tempDist = 0;
             boolean hit = false;
 
             //AMADOR: Loops through each block in the chunk. I loop through each block instead of each
@@ -375,6 +374,9 @@ public class Chunk {
                 if (intersect_Point != null && !hit) {
                     if (intersect_Point.x < vertices[i] && intersect_Point.x > vertices[i + 3]
                             && intersect_Point.z < vertices[i + 2] && intersect_Point.z > vertices[i + 8]) {
+                        distance = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                                + Math.pow((intersect_Point.y - ray[0].y), 2)
+                                + Math.pow((intersect_Point.z - ray[0].z), 2));
                         hit = true;
                     }
                 }
@@ -388,6 +390,10 @@ public class Chunk {
                 if (intersect_Point != null && !hit) {
                     if (intersect_Point.x < vertices[i + 12] && intersect_Point.x > vertices[i + 15]
                             && intersect_Point.z > vertices[i + 14] && intersect_Point.z < vertices[i + 20]) {
+                        tempDist = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                                + Math.pow((intersect_Point.y - ray[0].y), 2)
+                                + Math.pow((intersect_Point.z - ray[0].z), 2));
+                        distance = (tempDist < distance && hit) || !hit ? tempDist : distance;
                         hit = true;
                     }
                 }
@@ -401,6 +407,10 @@ public class Chunk {
                 if (intersect_Point != null && !hit) {
                     if (intersect_Point.x < vertices[i + 24] && intersect_Point.x > vertices[i + 27]
                             && intersect_Point.y < vertices[i + 25] && intersect_Point.y > vertices[i + 31]) {
+                        tempDist = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                                + Math.pow((intersect_Point.y - ray[0].y), 2)
+                                + Math.pow((intersect_Point.z - ray[0].z), 2));
+                        distance = (tempDist < distance && hit) || !hit ? tempDist : distance;
                         hit = true;
                     }
                 }
@@ -414,6 +424,10 @@ public class Chunk {
                 if (intersect_Point != null && !hit) {
                     if (intersect_Point.x < vertices[i + 36] && intersect_Point.x > vertices[i + 39]
                             && intersect_Point.y > vertices[i + 37] && intersect_Point.y < vertices[i + 43]) {
+                        tempDist = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                                + Math.pow((intersect_Point.y - ray[0].y), 2)
+                                + Math.pow((intersect_Point.z - ray[0].z), 2));
+                        distance = (tempDist < distance && hit) || !hit ? tempDist : distance;
                         hit = true;
                     }
                 }
@@ -427,6 +441,10 @@ public class Chunk {
                 if (intersect_Point != null && !hit) {
                     if (intersect_Point.z > vertices[i + 50] && intersect_Point.z < vertices[i + 53]
                             && intersect_Point.y < vertices[i + 49] && intersect_Point.y > vertices[i + 55]) {
+                        tempDist = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                                + Math.pow((intersect_Point.y - ray[0].y), 2)
+                                + Math.pow((intersect_Point.z - ray[0].z), 2));
+                        distance = (tempDist < distance && hit) || !hit ? tempDist : distance;
                         hit = true;
                     }
                 }
@@ -440,6 +458,10 @@ public class Chunk {
                 if (intersect_Point != null && !hit) {
                     if (intersect_Point.z < vertices[i + 62] && intersect_Point.z > vertices[i + 65]
                             && intersect_Point.y < vertices[i + 61] && intersect_Point.y > vertices[i + 67]) {
+                        tempDist = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                                + Math.pow((intersect_Point.y - ray[0].y), 2)
+                                + Math.pow((intersect_Point.z - ray[0].z), 2));
+                        distance = (tempDist < distance && hit) || !hit ? tempDist : distance;
                         hit = true;
                     }
                 }
@@ -448,13 +470,9 @@ public class Chunk {
                 if (hit) {
                     float[] block = new float[72];
                     System.arraycopy(vertices, i, block, 0, 72);
-                    distance = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
-                            + Math.pow((intersect_Point.y - ray[0].y), 2)
-                            + Math.pow((intersect_Point.z - ray[0].z), 2));
                     selectedBlocks.put(distance, block);
                 }
                 hit = false;
-                block_Num++;
             }
             outlineBlock();
         }
@@ -504,10 +522,10 @@ public class Chunk {
     }
 
     private void outlineBlock() {
-        if(selectedBlocks.isEmpty()) {
+        if (selectedBlocks.isEmpty()) {
             return;
         }
-        
+
         float[] vertices = selectedBlocks.pollFirstEntry().getValue();
 
         glLineWidth(3f);

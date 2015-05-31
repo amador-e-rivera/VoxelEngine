@@ -24,7 +24,7 @@ import static org.lwjgl.util.glu.GLU.gluUnProject;
  */
 public class FPCameraController {
 
-    private final int NUM_OF_CHUNKS = 1; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
+    private final int NUM_OF_CHUNKS = 2; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
     private ArrayList<Chunk> chunks;
@@ -129,7 +129,7 @@ public class FPCameraController {
 
         //AMADOR: This is where I get the seed to be used the the Chunk SimplexNoise object.
         Random r = new Random();
-        noise_Seed = r.nextInt();//-1049537650, -1807078236;//r.nextInt();
+        noise_Seed = r.nextInt();
         System.out.println("Seed: " + noise_Seed);
 
         //Generates an array of Chunks. The i and k values are sort of like the key for the chunk. It
@@ -162,6 +162,12 @@ public class FPCameraController {
             //When passing in the distance to move we times the movementSpeedwith dtthis is a time scale
             //so if its a slow frame u move more then a fast frame so on a slow computer you move just as 
             //fast as on a fast computer
+            /*
+            if (Sys.getTime() - time > 90) {
+                time = Sys.getTime();
+            }
+            */
+
             if (Mouse.hasWheel()) {
                 int wheel = Mouse.getDWheel();
                 if (wheel < 0) {
@@ -169,7 +175,6 @@ public class FPCameraController {
                 } else if (wheel > 0) {
                     player.updateBlockType(1);
                 }
-
             }
             if (Keyboard.isKeyDown(Keyboard.KEY_W))//move forward
             {
