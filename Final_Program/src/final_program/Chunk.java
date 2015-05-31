@@ -27,6 +27,7 @@ public class Chunk {
     private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
     FloatBuffer VertexTextureData, VertexPositionData, VertexColorData;
+    private float[] vertices;
 
     public Chunk(int startX, int startY, int startZ, int noise_Seed) {
         try {
@@ -152,12 +153,12 @@ public class Chunk {
 
                     //Highlights chunk perimeter
                     /*
-                    if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
-                        VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
-                    } else {
-                        VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-                    }
-                            */
+                     if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
+                     VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
+                     } else {
+                     VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
+                     }
+                     */
                     VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1].getBlockType()));
                 }
@@ -180,29 +181,29 @@ public class Chunk {
     }
 
     private void setBlockType(int max_Height, int x, int y, int z) {
-        
+
         if (y == 0) {
             blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
         } else if (max_Height == 4 && y < 4) {
-            
-            if (r.nextInt(100) == 1){
+
+            if (r.nextInt(100) == 1) {
                 blocks[x][y][z].setBlockType(Block.BlockType.Lily);
-            }else {
+            } else {
                 blocks[x][y][z].setBlockType(Block.BlockType.Water);
             }
         } else if (max_Height == 5 && y < 5) {
             blocks[x][y][z].setBlockType(Block.BlockType.Sand);
-            SpawnCacti(x,y,z,1);
+            SpawnCacti(x, y, z, 1);
         } else if (y == max_Height || y == max_Height - 1) {
-            if (y > CHUNK_SIZE - 7){
+            if (y > CHUNK_SIZE - 7) {
                 blocks[x][y][z].setBlockType(Block.BlockType.Snow);
-                SpawnJackO(x,y,z, 10);
-            } else{
+                SpawnJackO(x, y, z, 10);
+            } else {
                 blocks[x][y][z].setBlockType(Block.BlockType.Grass);
-                SpawnPumkin(x,y,z,1);
+                SpawnPumkin(x, y, z, 1);
             }
-            
-            SpawnTree(x,y,z,1);
+
+            SpawnTree(x, y, z, 1);
 
         } else if (max_Height >= 6 && y <= 3) {
             blocks[x][y][z].setBlockType(Block.BlockType.BedRock);
@@ -214,129 +215,330 @@ public class Chunk {
             }
         }
     }
-    
+
     //Preston: Returns true if spawns a tree, must give percentage 0 to 100 on odds of spawning a tree
-    private boolean SpawnTree(int x, int y, int z, int percentToSpawn){
-        
-        if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8){
+    private boolean SpawnTree(int x, int y, int z, int percentToSpawn) {
+
+        if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8) {
             blocks[x][y][z].setBlockType(Block.BlockType.Wood);
 
             int hieght = r.nextInt(4) + 3;
-            
-            for (int i = 1; i < hieght; i++){
+
+            for (int i = 1; i < hieght; i++) {
                 VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Wood));
                 VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                                (float) ((y+i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((y + i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
                 VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             }
-    
-            for (int i = - 1; i < 2; i++){
-                for (int j = -1; j < 2; j++){
+
+            for (int i = - 1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
                     VertexPositionData.put(
-                        createCube(
-                                (float) ((StartX * CHUNK_SIZE * 2) + (x+i) * CUBE_LENGTH),
-                                (float) ((y+hieght) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
-                                (float) ((StartZ * CHUNK_SIZE * 2) + (z+j) * CUBE_LENGTH))
-                        );
+                            createCube(
+                                    (float) ((StartX * CHUNK_SIZE * 2) + (x + i) * CUBE_LENGTH),
+                                    (float) ((y + hieght) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                    (float) ((StartZ * CHUNK_SIZE * 2) + (z + j) * CUBE_LENGTH))
+                    );
                     VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                 }
             }
-            
+
             VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Leaf));
             VertexPositionData.put(
-                        createCube(
-                                (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                                (float) ((y+hieght+1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
-                                (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
-                );
+                    createCube(
+                            (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
+                            (float) ((y + hieght + 1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
+            );
             VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
 
             return true;
-        } 
-        
+        }
+
         return false; //No tree spawned
     }
-    
-    private boolean SpawnCacti(int x, int y, int z, int percentToSpawn){
-        
-        if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8){
-            
-            for (int i = 1; i < 4; i++){
+
+    private boolean SpawnCacti(int x, int y, int z, int percentToSpawn) {
+
+        if (r.nextInt(100) < percentToSpawn && y < CHUNK_SIZE - 8) {
+
+            for (int i = 1; i < 4; i++) {
                 VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Cacti));
                 VertexPositionData.put(
                         createCube(
                                 (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                                (float) ((y+i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                                (float) ((y + i) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                                 (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
                 );
                 VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
             }
-    
+
             return true;
-        } 
-        
+        }
+
         return false; //No tree spawned
     }
-    
-    private boolean SpawnPumkin(int x, int y, int z, int percentToSpawn){
-        
-        if (r.nextInt(1000) < percentToSpawn && y < CHUNK_SIZE - 8){
+
+    private boolean SpawnPumkin(int x, int y, int z, int percentToSpawn) {
+
+        if (r.nextInt(1000) < percentToSpawn && y < CHUNK_SIZE - 8) {
 
             VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.Pumkin));
             VertexPositionData.put(
                     createCube(
                             (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                            (float) ((y+1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((y + 1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
             );
             VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-    
+
             return true;
-        } 
-        
-        return false; 
+        }
+
+        return false;
     }
-    
-    private boolean SpawnJackO(int x, int y, int z, int percentToSpawn){
-        
-        if (r.nextInt(1000) < percentToSpawn && y < CHUNK_SIZE - 5){
+
+    private boolean SpawnJackO(int x, int y, int z, int percentToSpawn) {
+
+        if (r.nextInt(1000) < percentToSpawn && y < CHUNK_SIZE - 5) {
 
             VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.JackO));
             VertexPositionData.put(
                     createCube(
                             (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                            (float) ((y+3) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((y + 3) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
             );
             VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-            
+
             VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
             VertexPositionData.put(
                     createCube(
                             (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                            (float) ((y+2) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((y + 2) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
             );
             VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-            
+
             VertexTextureData.put(createTexCube((float) 0, (float) 0, Block.BlockType.BedRock));
             VertexPositionData.put(
                     createCube(
                             (float) ((StartX * CHUNK_SIZE * 2) + x * CUBE_LENGTH),
-                            (float) ((y+1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
+                            (float) ((y + 1) * CUBE_LENGTH + (int) (CHUNK_SIZE * .8)),
                             (float) ((StartZ * CHUNK_SIZE * 2) + z * CUBE_LENGTH))
             );
             VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-    
+
             return true;
-        } 
-        
-        return false; 
+        }
+
+        return false;
+    }
+
+    //AMADOR: In this method, I pass the ray for the center of the viewport. This method will use the ray
+    //to determine if the ray passes through a block. If it does, then it will highlight it, otherwise it
+    //does nothing.
+    public void update(Vector3Float[] ray) {
+        //AMADOR: Get vertex data and put it in a float array to save into memory.
+        if (VertexPositionData.hasRemaining()) {
+            vertices = new float[VertexPositionData.limit()];
+            VertexPositionData.get(vertices);
+        }
+
+        if (vertices != null) {
+            Vector3Float intersect_Point;
+            boolean hit = false;
+
+            //AMADOR: Loops through each block in the chunk. I loop through each block instead of each
+            //vertex to reduce the number of loops. I then check each face of the block to see if the
+            //ray intersects it.
+            for (int i = 0; i < vertices.length; i += 72) {
+
+                //TOP FACE
+                intersect_Point = rayIntersect(ray[0], ray[1],
+                        new Vector3Float(vertices[i], vertices[i + 1], vertices[i + 2]),
+                        new Vector3Float(vertices[i + 3], vertices[i + 4], vertices[i + 5]),
+                        new Vector3Float(vertices[i + 6], vertices[i + 7], vertices[i + 8]));
+
+                //AMADOR: These if statments will determine if the the ray intersects the block. If it does, then
+                //it sets hit to true. There is one of these if statements for each face of the block.
+                if (intersect_Point != null && !hit) {
+                    if (intersect_Point.x < vertices[i] && intersect_Point.x > vertices[i + 3]
+                            && intersect_Point.z < vertices[i + 2] && intersect_Point.z > vertices[i + 8]) {
+                        hit = true;
+                    }
+                }
+
+                //BOTTOM FACE
+                intersect_Point = rayIntersect(ray[0], ray[1],
+                        new Vector3Float(vertices[i + 12], vertices[i + 13], vertices[i + 14]),
+                        new Vector3Float(vertices[i + 15], vertices[i + 16], vertices[i + 17]),
+                        new Vector3Float(vertices[i + 18], vertices[i + 19], vertices[i + 20]));
+
+                if (intersect_Point != null && !hit) {
+                    if (intersect_Point.x < vertices[i + 12] && intersect_Point.x > vertices[i + 15]
+                            && intersect_Point.z > vertices[i + 14] && intersect_Point.z < vertices[i + 20]) {
+                        hit = true;
+                    }
+                }
+
+                //BACK FACE
+                intersect_Point = rayIntersect(ray[0], ray[1],
+                        new Vector3Float(vertices[i + 24], vertices[i + 25], vertices[i + 26]),
+                        new Vector3Float(vertices[i + 27], vertices[i + 28], vertices[i + 29]),
+                        new Vector3Float(vertices[i + 30], vertices[i + 31], vertices[i + 32]));
+
+                if (intersect_Point != null && !hit) {
+                    if (intersect_Point.x < vertices[i + 24] && intersect_Point.x > vertices[i + 27]
+                            && intersect_Point.y < vertices[i + 25] && intersect_Point.y > vertices[i + 31]) {
+                        hit = true;
+                    }
+                }
+
+                //FRONT FACE
+                intersect_Point = rayIntersect(ray[0], ray[1],
+                        new Vector3Float(vertices[i + 36], vertices[i + 37], vertices[i + 38]),
+                        new Vector3Float(vertices[i + 39], vertices[i + 40], vertices[i + 41]),
+                        new Vector3Float(vertices[i + 42], vertices[i + 43], vertices[i + 44]));
+
+                if (intersect_Point != null && !hit) {
+                    if (intersect_Point.x < vertices[i + 36] && intersect_Point.x > vertices[i + 39]
+                            && intersect_Point.y > vertices[i + 37] && intersect_Point.y < vertices[i + 43]) {
+                        hit = true;
+                    }
+                }
+
+                //LEFT FACE
+                intersect_Point = rayIntersect(ray[0], ray[1],
+                        new Vector3Float(vertices[i + 48], vertices[i + 49], vertices[i + 50]),
+                        new Vector3Float(vertices[i + 51], vertices[i + 52], vertices[i + 53]),
+                        new Vector3Float(vertices[i + 54], vertices[i + 55], vertices[i + 56]));
+
+                if (intersect_Point != null && !hit) {
+                    if (intersect_Point.z > vertices[i + 50] && intersect_Point.z < vertices[i + 53]
+                            && intersect_Point.y < vertices[i + 49] && intersect_Point.y > vertices[i + 55]) {
+                        hit = true;
+                    }
+                }
+
+                //RIGHT FACE
+                intersect_Point = rayIntersect(ray[0], ray[1],
+                        new Vector3Float(vertices[i + 60], vertices[i + 61], vertices[i + 62]),
+                        new Vector3Float(vertices[i + 63], vertices[i + 64], vertices[i + 65]),
+                        new Vector3Float(vertices[i + 69], vertices[i + 70], vertices[i + 71]));
+
+                if (intersect_Point != null && !hit) {
+                    if (intersect_Point.z < vertices[i + 62] && intersect_Point.z > vertices[i + 65]
+                            && intersect_Point.y < vertices[i + 61] && intersect_Point.y > vertices[i + 67]) {
+                        hit = true;
+                    }
+                }
+
+                //AMADOR: If the ray does hit the block, then outline the block
+                if (hit) {
+                    float[] block = new float[72];
+                    System.arraycopy(vertices, i, block, 0, 72);
+                    outlineBlock(block);
+                }
+                hit = false;
+            }
+
+            System.out.println();
+        }
+    }
+
+    //AMADOR: Determines if a ray intersects a plane. The r0 and r1 parameters represent two points of
+    //ray line. The P, Q, R parameters represent three points in the plane. In this implementation, the plane
+    //is the plane for the current face being tested on a block.
+    public static Vector3Float rayIntersect(Vector3Float ray0, Vector3Float ray1,
+            Vector3Float P, Vector3Float Q, Vector3Float R) {
+        Vector3Float PQ = new Vector3Float(Q.x - P.x, Q.y - P.y, Q.z - P.z);
+        Vector3Float PR = new Vector3Float(R.x - P.x, R.y - P.y, R.z - P.z);
+        float t;
+
+        //AMADOR:
+        //Parametric representation of a 3D line:
+        //F(t) = <x0, y0, z0> + t * <x1-x0, y1-y0, z1-z0>
+        //     = <x0 + t(x1-x0), y0 + t(y1-y0), z0 + t(z1-z0)>
+        //               x            y             z
+        //
+        //Plane Equation (Note that <a,b,c> is the normal of the plane):
+        //f(x,y,z) = ax + by + cz + d
+        Vector3Float normal = normal(PQ, PR); //AMADOR: normal is <a,b,c>
+        float a = normal.x;
+        float b = normal.y;
+        float c = normal.z;
+        float d = -((-P.x * a) + (-P.y * b) + (-P.z * c));
+
+        t = (-((a * ray0.x + b * ray0.y + c * ray0.z)) + d)
+                / ((a * (ray1.x - ray0.x)) + (b * (ray1.y - ray0.y)) + (c * (ray1.z - ray0.z)));
+
+        if (t != 0 && !Float.isInfinite(t)) {
+            return new Vector3Float(
+                    (ray0.x + (t * (ray1.x - ray0.x))),
+                    (ray0.y + (t * (ray1.y - ray0.y))),
+                    (ray0.z + (t * (ray1.z - ray0.z)))
+            );
+        } else {
+            return null;
+        }
+    }
+
+    //AMADOR: This method simply returns the normal (Cross Product) of two vectors.
+    public static Vector3Float normal(Vector3Float v1, Vector3Float v2) {
+        return new Vector3Float((v1.y * v2.z) - (v1.z * v2.y), (v1.z * v2.x) - (v1.x * v2.z),
+                (v1.x * v2.y) - (v1.y * v2.x));
+    }
+
+    private void outlineBlock(float[] vertices) {
+        glLineWidth(3f);
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(vertices[0], vertices[1], vertices[2]);
+        glVertex3f(vertices[3], vertices[4], vertices[5]);
+        glVertex3f(vertices[6], vertices[7], vertices[8]);
+        glVertex3f(vertices[9], vertices[10], vertices[11]);
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(vertices[12], vertices[13], vertices[14]);
+        glVertex3f(vertices[15], vertices[16], vertices[17]);
+        glVertex3f(vertices[18], vertices[19], vertices[20]);
+        glVertex3f(vertices[21], vertices[22], vertices[23]);
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(vertices[24], vertices[25], vertices[26]);
+        glVertex3f(vertices[27], vertices[28], vertices[29]);
+        glVertex3f(vertices[30], vertices[31], vertices[32]);
+        glVertex3f(vertices[33], vertices[34], vertices[35]);
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(vertices[36], vertices[37], vertices[38]);
+        glVertex3f(vertices[39], vertices[40], vertices[41]);
+        glVertex3f(vertices[42], vertices[43], vertices[44]);
+        glVertex3f(vertices[45], vertices[46], vertices[47]);
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(vertices[48], vertices[49], vertices[50]);
+        glVertex3f(vertices[51], vertices[52], vertices[53]);
+        glVertex3f(vertices[54], vertices[55], vertices[56]);
+        glVertex3f(vertices[57], vertices[58], vertices[59]);
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(vertices[60], vertices[61], vertices[62]);
+        glVertex3f(vertices[63], vertices[64], vertices[65]);
+        glVertex3f(vertices[66], vertices[67], vertices[68]);
+        glVertex3f(vertices[69], vertices[70], vertices[71]);
+        glEnd();
     }
 
     private float[] createCubeVertexCol(float[] CubeColorArray) {
@@ -349,7 +551,7 @@ public class Chunk {
 
     public static float[] createCube(float x, float y, float z) {
         int offset = CUBE_LENGTH / 2;
-        
+
         return new float[]{
             // TOP QUAD
             x + offset, y + offset, z,
@@ -391,7 +593,7 @@ public class Chunk {
     public static float[] createTexCube(float x, float y, Block.BlockType blockType) {
         float offset = (1024f / 16) / 1024f;
         int x1 = 0, x2, y1 = 0, y2;
-        
+
         switch (blockType) {
             case Grass:
                 return new float[]{
@@ -624,10 +826,10 @@ public class Chunk {
                 y1 = 0;
                 break;
         }
-        
+
         x2 = x1 + 1;
         y2 = y1 + 1;
-        
+
         return new float[]{
             // BOTTOM QUAD(DOWN=+Y)
             x + offset * x2, y + offset * y2,

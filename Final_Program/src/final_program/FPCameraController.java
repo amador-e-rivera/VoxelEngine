@@ -5,14 +5,18 @@
  */
 package final_program;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Random;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.Sys;
+import static org.lwjgl.util.glu.GLU.gluUnProject;
 
 /**
  *
@@ -20,7 +24,7 @@ import org.lwjgl.Sys;
  */
 public class FPCameraController {
 
-    private final int NUM_OF_CHUNKS = 4; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
+    private final int NUM_OF_CHUNKS = 3; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
     private ArrayList<Chunk> chunks;
@@ -145,6 +149,14 @@ public class FPCameraController {
 
         //keep looping until the dipslay window is closed or ESC is pressed
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+            if (Sys.getTime() - time > 250) {
+                time = Sys.getTime();
+                System.out.println(
+                        "Chunk " + (int) (Math.abs(camera.position.x) / (2 * Chunk.CHUNK_SIZE)) + ","
+                        + (int) (Math.abs(camera.position.z) / (2 * Chunk.CHUNK_SIZE)) + " "
+                        + "(x:" + camera.position.x + " z:" + camera.position.z + ")");
+            }
+
             //distance in mouse movement
             dx = Mouse.getDX();
             dy = Mouse.getDY();
@@ -193,14 +205,16 @@ public class FPCameraController {
             camera.lookThrough();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glRotatef(135f, 0f, 1f, 0f);
+            glRotatef(90f, 0f, 1f, 0f);
             glTranslatef(0f, -70f, 0f);
             //glTranslatef(-(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS), -70f, -(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS)); //Centers you in terrain
 
             player.render();
             crossHair.render();
 
+            Vector3Float[] ray = getRay();
             for (Chunk c : chunks) {
+                c.update(ray);
                 c.render();
             }
 
@@ -209,5 +223,32 @@ public class FPCameraController {
             Display.sync(60);
         }
         Display.destroy();
+    }
+
+    //AMADOR: This method gets the ray for the center of the viewport in world space coordinates. It returns
+    //the close and far points of the ray.
+    public Vector3Float[] getRay() {
+        IntBuffer viewport = BufferUtils.createIntBuffer(16);
+        FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+        FloatBuffer projection = BufferUtils.createFloatBuffer(16);
+        FloatBuffer close = BufferUtils.createFloatBuffer(3);
+        FloatBuffer far = BufferUtils.createFloatBuffer(3);
+        float winX, winY;
+
+        glGetFloat(GL_MODELVIEW_MATRIX, modelview); //AMADOR: Get modelview matrix
+        glGetFloat(GL_PROJECTION_MATRIX, projection); //AMADOR: Get projection matrix
+        glGetInteger(GL_VIEWPORT, viewport); //AMADOR: Get viewport
+
+        winX = (viewport.get(2) - viewport.get(0)) / 2; //AMADOR: Center of screen in x axis
+        winY = (viewport.get(3) - viewport.get(1)) / 2; //AMADOR: Center of screen in y axis
+
+        //AMADOR: Get world coordinates of center of screen (near plane).
+        gluUnProject(winX, winY, 0, modelview, projection, viewport, close);
+
+        //AMADOR: Get world coordinates of center of screen (far plane).
+        gluUnProject(winX, winY, 1, modelview, projection, viewport, far);
+
+        return new Vector3Float[]{new Vector3Float(close.get(0), close.get(1), close.get(2)),
+            new Vector3Float(far.get(0), far.get(1), far.get(2))};
     }
 }
