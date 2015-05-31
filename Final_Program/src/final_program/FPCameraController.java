@@ -24,7 +24,7 @@ import static org.lwjgl.util.glu.GLU.gluUnProject;
  */
 public class FPCameraController {
 
-    private final int NUM_OF_CHUNKS = 3; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
+    private final int NUM_OF_CHUNKS = 1; //AMADOR: NUM_OF_CHUNKS x NUM_OF_CHUNKS = Total # of chunks generated
 
     //Each Block has rgb variables for its color and the x, y & z coordinates for that cube.
     private ArrayList<Chunk> chunks;
@@ -149,13 +149,6 @@ public class FPCameraController {
 
         //keep looping until the dipslay window is closed or ESC is pressed
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-            if (Sys.getTime() - time > 250) {
-                time = Sys.getTime();
-                System.out.println(
-                        "Chunk " + (int) (Math.abs(camera.position.x) / (2 * Chunk.CHUNK_SIZE)) + ","
-                        + (int) (Math.abs(camera.position.z) / (2 * Chunk.CHUNK_SIZE)) + " "
-                        + "(x:" + camera.position.x + " z:" + camera.position.z + ")");
-            }
 
             //distance in mouse movement
             dx = Mouse.getDX();
@@ -206,7 +199,7 @@ public class FPCameraController {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glRotatef(90f, 0f, 1f, 0f);
-            glTranslatef(0f, -70f, 0f);
+            glTranslatef(0f, -90f, 0f);
             //glTranslatef(-(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS), -70f, -(Chunk.CHUNK_SIZE * NUM_OF_CHUNKS)); //Centers you in terrain
 
             player.render();

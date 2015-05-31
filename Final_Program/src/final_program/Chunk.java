@@ -7,6 +7,7 @@ package final_program;
 
 import java.nio.FloatBuffer;
 import java.util.Random;
+import java.util.TreeMap;
 import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -28,6 +29,7 @@ public class Chunk {
     private Random r;
     FloatBuffer VertexTextureData, VertexPositionData, VertexColorData;
     private float[] vertices;
+    private TreeMap<Float, float[]> selectedBlocks;
 
     public Chunk(int startX, int startY, int startZ, int noise_Seed) {
         try {
@@ -351,7 +353,10 @@ public class Chunk {
         }
 
         if (vertices != null) {
+            selectedBlocks = new TreeMap<>();
             Vector3Float intersect_Point;
+            int block_Num = 0;
+            float distance = 0;
             boolean hit = false;
 
             //AMADOR: Loops through each block in the chunk. I loop through each block instead of each
@@ -443,12 +448,15 @@ public class Chunk {
                 if (hit) {
                     float[] block = new float[72];
                     System.arraycopy(vertices, i, block, 0, 72);
-                    outlineBlock(block);
+                    distance = (float) Math.sqrt(Math.pow((intersect_Point.x - ray[0].x), 2)
+                            + Math.pow((intersect_Point.y - ray[0].y), 2)
+                            + Math.pow((intersect_Point.z - ray[0].z), 2));
+                    selectedBlocks.put(distance, block);
                 }
                 hit = false;
+                block_Num++;
             }
-
-            System.out.println();
+            outlineBlock();
         }
     }
 
@@ -495,7 +503,13 @@ public class Chunk {
                 (v1.x * v2.y) - (v1.y * v2.x));
     }
 
-    private void outlineBlock(float[] vertices) {
+    private void outlineBlock() {
+        if(selectedBlocks.isEmpty()) {
+            return;
+        }
+        
+        float[] vertices = selectedBlocks.pollFirstEntry().getValue();
+
         glLineWidth(3f);
         glColor3f(0, 0, 0);
         glBegin(GL_LINE_LOOP);

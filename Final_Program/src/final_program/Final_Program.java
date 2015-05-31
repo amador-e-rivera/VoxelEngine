@@ -60,7 +60,7 @@ public class Final_Program {
         glEnable(GL_TEXTURE_2D);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         
-        //initFog();
+        initFog();
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
