@@ -52,6 +52,7 @@ public class Final_Program {
         glClearColor(0.55f, 0.65f, 1.0f, 0.0f);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -61,7 +62,6 @@ public class Final_Program {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
         initFog();
-
         initLightArrays();
 
         glMatrixMode(GL_PROJECTION);
@@ -80,18 +80,18 @@ public class Final_Program {
         glEnable(GL_FOG);
         glFogi(GL_FOG_MODE, GL_EXP2);
         glFog(GL_FOG_COLOR, fog_Color);
-        glFogf(GL_FOG_DENSITY, 0.0075f);
+        glFogf(GL_FOG_DENSITY, 0.0055f);
     }
 
     private void initLightArrays() {
         FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+        lightPosition.put(0.2f).put(-0.2f).put(0.0f).put(1.0f).flip();
         FloatBuffer ambient = BufferUtils.createFloatBuffer(4);
-        ambient.put(1f).put(1f).put(1f).put(1.0f).flip();
+        ambient.put(0.3f).put(0.3f).put(0.3f).put(1f).flip();
         FloatBuffer diffuse = BufferUtils.createFloatBuffer(4);
-        diffuse.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
+        diffuse.put(1f).put(1f).put(1f).put(1.0f).flip();
         FloatBuffer specular = BufferUtils.createFloatBuffer(4);
-        specular.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
+        specular.put(0.8f).put(0.8f).put(0.8f).put(1.0f).flip();
 
         glLight(GL_LIGHT0, GL_POSITION, lightPosition); //sets our light’s position
         glLight(GL_LIGHT0, GL_SPECULAR, specular);//sets our specular light
@@ -99,9 +99,11 @@ public class Final_Program {
         glLight(GL_LIGHT0, GL_AMBIENT, ambient);//sets our ambient light
         glEnable(GL_LIGHTING);//enables our lighting
         glEnable(GL_LIGHT0);//enables light0
-        
-        //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-        //glEnable(GL_COLOR_MATERIAL);
+
+        //AMADOR: These two functions allows use to use color on our blocks. If this wasn't here, then
+        //the block highlighting would just take on the color of the texture instead of being black.
+        glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+        glEnable(GL_COLOR_MATERIAL);
     }
 
     /**

@@ -66,7 +66,7 @@ public class FPCameraController {
         position.x -= xOffset;
         position.z += zOffset;
 
-        //updateLight(xOffset, zOffset);
+        updateLight(xOffset, zOffset);
     }
 
     //Moves the camera backward relative to its current rotation (yaw)
@@ -77,7 +77,7 @@ public class FPCameraController {
         position.x += xOffset;
         position.z -= zOffset;
 
-        //updateLight(xOffset, zOffset);
+        updateLight(xOffset, zOffset);
     }
 
     //Strafes the camera left relative to its current rotation (yaw)
@@ -88,7 +88,7 @@ public class FPCameraController {
         position.x -= xOffset;
         position.z += zOffset;
 
-        //updateLight(xOffset, zOffset);
+        updateLight(xOffset, zOffset);
     }
 
     //Strafes the camera right relative to its current rotation (yaw)
@@ -99,7 +99,7 @@ public class FPCameraController {
         position.x -= xOffset;
         position.z += zOffset;
 
-        //updateLight(xOffset, zOffset);
+        updateLight(xOffset, zOffset);
     }
 
     //Moves camera up relative to its current rotation (yaw)
@@ -122,15 +122,15 @@ public class FPCameraController {
         glTranslatef(position.x, position.y, position.z);
 
         FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(lPosition.x).put(lPosition.y).put(lPosition.z).put(1.0f).flip();
+        lightPosition.put(0.2f).put(-0.3f).put(0.0f).put(0.0f).flip();
         glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     private void updateLight(float xOffset, float zOffset) {
-        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(lPosition.x -= xOffset).put(lPosition.y).put(lPosition.z += zOffset).
-                put(1.0f).flip();
-        glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+        //FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        //lightPosition.put(lPosition.x -= xOffset).put(lPosition.y).put(lPosition.z += zOffset).
+        //        put(0.0f).flip();
+        //glLight(GL_LIGHT0, GL_POSITION, lightPosition);
     }
 
     public void gameLoop() {
@@ -148,7 +148,7 @@ public class FPCameraController {
 
         //AMADOR: This is where I get the seed to be used the the Chunk SimplexNoise object.
         Random r = new Random();
-        noise_Seed = r.nextInt();
+        noise_Seed = r.nextInt();//-194301400;
         System.out.println("Seed: " + noise_Seed);
 
         //Generates an array of Chunks. The i and k values are sort of like the key for the chunk. It

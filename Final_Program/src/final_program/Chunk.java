@@ -21,13 +21,12 @@ public class Chunk {
     static final int CHUNK_SIZE = 32; //AMADOR: Increased Chunk size to see the terrain a little better.
     static final int CUBE_LENGTH = 2;
     private Block[][][] blocks;
-    private int VBOVertexHandle;
-    private int VBOColorHandle;
     private Texture texture;
-    private int VBOTextureHandle;
     private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
-    FloatBuffer VertexTextureData, VertexPositionData, VertexColorData, NormalsBuffer;
+    private int bufferSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12;
+    private int VBOVertexHandle, VBOColorHandle, VBOTextureHandle, VBONormalsHandle;
+    private FloatBuffer VertexTextureData, VertexPositionData, VertexColorData, VertexNormalsData;
     private float[] vertices;
     private TreeMap<Float, float[]> selectedBlocks;
 
@@ -50,10 +49,7 @@ public class Chunk {
                 }
             }
         }
-
-        VBOColorHandle = glGenBuffers();
-        VBOVertexHandle = glGenBuffers();
-        VBOTextureHandle = glGenBuffers();
+        
         StartX = startX;
         StartY = startY;
         StartZ = startZ;
@@ -63,14 +59,16 @@ public class Chunk {
 
     public void render() {
         glPushMatrix();
-        //AMADOR: Used the following 2 commands to render the lighting on the chunk.
-        //glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //glNormalPointer(0, NormalsBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glVertexPointer(3, GL_FLOAT, 0, 0L);
+        
         glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
         glColorPointer(3, GL_FLOAT, 0, 0L);
+        
+        //AMADOR: Used the following 2 commands to render the lighting on the chunk.
+        glBindBuffer(GL_ARRAY_BUFFER, VBONormalsHandle);
+        glNormalPointer(GL_FLOAT,0,0L);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBindTexture(GL_TEXTURE_2D, 1);
@@ -96,15 +94,15 @@ public class Chunk {
         //the same seed.
         SimplexNoise noise = new SimplexNoise(mountain_Width, persistance, noise_Seed/*5*/);
 
-        int bufferSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12;
-
         VBOColorHandle = glGenBuffers();
         VBOVertexHandle = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
+        VBONormalsHandle = glGenBuffers();
 
         VertexPositionData = BufferUtils.createFloatBuffer(bufferSize);
         VertexColorData = BufferUtils.createFloatBuffer(bufferSize);
         VertexTextureData = BufferUtils.createFloatBuffer(bufferSize);
+        VertexNormalsData = BufferUtils.createFloatBuffer(bufferSize);
 
         //AMADOR: In order for the terrain to appear smooth between chunks, when one chunk is done being
         //generated, then the next chunk needs to pick up (in terms of x & z) where the last chunk left off. 
@@ -178,14 +176,16 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexPositionData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
         glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexColorData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        //normals_Buffer(VertexPositionData);
+        normals_Buffer(VertexPositionData);
     }
 
     private void setBlockType(int max_Height, int x, int y, int z) {
@@ -519,27 +519,32 @@ public class Chunk {
         }
     }
 
+    //AMADOR: Generates a normals buffer for each vertex. This is used to create more realistic lighting.
     private void normals_Buffer(FloatBuffer vertices) {
-        NormalsBuffer = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 18);
+        VertexNormalsData = BufferUtils.createFloatBuffer(bufferSize);
 
         for (int i = 0; i < vertices.limit(); i += 12) {
-            Vector3Float n1 = normal(
+            Vector3Float n = normal(
                     new Vector3Float(vertices.get(i), vertices.get(i + 1), vertices.get(i + 2)),
                     new Vector3Float(vertices.get(i + 3), vertices.get(i + 4), vertices.get(i + 5)),
                     new Vector3Float(vertices.get(i + 6), vertices.get(i + 7), vertices.get(i + 8))
             );
 
-            Vector3Float n2 = normal(
-                    new Vector3Float(vertices.get(i + 3), vertices.get(i + 4), vertices.get(i + 5)),
-                    new Vector3Float(vertices.get(i + 6), vertices.get(i + 7), vertices.get(i + 8)),
-                    new Vector3Float(vertices.get(i + 9), vertices.get(i + 10), vertices.get(i + 11))
-            );
-
-            Vector3Float normalized = normalize(new Vector3Float(n1.x + n2.x, n1.y + n2.y, n1.z + n2.z));
-            NormalsBuffer.put(normalized.x).put(normalized.y).put(normalized.z);
+            Vector3Float normalized = normalize(n);
+            
+            //AMADOR: Since OpenGL needs a normal for each vertex in the vertex buffer, then I am simply
+            //adding the same normalized vector for each vertex in the quad.
+            VertexNormalsData.put(normalized.x).put(normalized.y).put(normalized.z);
+            VertexNormalsData.put(normalized.x).put(normalized.y).put(normalized.z);
+            VertexNormalsData.put(normalized.x).put(normalized.y).put(normalized.z);
+            VertexNormalsData.put(normalized.x).put(normalized.y).put(normalized.z);
         }
 
-        NormalsBuffer.flip();
+        VertexNormalsData.flip();
+        
+        glBindBuffer(GL_ARRAY_BUFFER, VBONormalsHandle);
+        glBufferData(GL_ARRAY_BUFFER, VertexNormalsData, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     //AMADOR: This method simply returns the normal (Cross Product) of two vectors.
@@ -568,6 +573,7 @@ public class Chunk {
         return v;
     }
 
+    //AMADOR: This method outlines a block.
     private void outlineBlock() {
         if (selectedBlocks.isEmpty()) {
             return;
