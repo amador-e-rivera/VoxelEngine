@@ -9,7 +9,9 @@ import java.util.LinkedList;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- *
+ * This class was supposed to be used for assisting in collision detection but never got it. It does however
+ * display the block that the player carries around for placing in the world. It also allows for scrolling
+ * the blocks that are available for placing.
  * @author Amador
  */
 public class Player {
@@ -33,6 +35,11 @@ public class Player {
         blocks.add(Block.BlockType.Sand);
         blocks.add(Block.BlockType.BedRock);
         blocks.add(Block.BlockType.Wood);
+        blocks.add(Block.BlockType.Snow);
+        blocks.add(Block.BlockType.Cacti);
+        blocks.add(Block.BlockType.JackO);
+        blocks.add(Block.BlockType.Leaf);
+        blocks.add(Block.BlockType.Lily);
     }
 
     public void updateBlockType(int direction) {

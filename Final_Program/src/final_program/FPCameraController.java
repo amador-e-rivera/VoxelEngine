@@ -181,11 +181,6 @@ public class FPCameraController {
             //When passing in the distance to move we times the movementSpeedwith dtthis is a time scale
             //so if its a slow frame u move more then a fast frame so on a slow computer you move just as 
             //fast as on a fast computer
-            /*
-             if (Sys.getTime() - time > 90) {
-             time = Sys.getTime();
-             }
-             */
             if (Mouse.hasWheel()) {
                 int wheel = Mouse.getDWheel();
                 if (wheel < 0) {

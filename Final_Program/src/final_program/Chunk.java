@@ -66,7 +66,7 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
         glColorPointer(3, GL_FLOAT, 0, 0L);
         
-        //AMADOR: Used the following 2 commands to render the lighting on the chunk.
+        //AMADOR: Used the following 2 commands for the vertex normals to render the lighting on the chunk.
         glBindBuffer(GL_ARRAY_BUFFER, VBONormalsHandle);
         glNormalPointer(GL_FLOAT,0,0L);
 
@@ -155,14 +155,6 @@ public class Chunk {
                                     (float) ((StartZ * CHUNK_SIZE * 2) + z1 * CUBE_LENGTH))
                     );
 
-                    //Highlights chunk perimeter
-                    /*
-                     if (x1 == 0 || x1 == CHUNK_SIZE - 1 || z1 == 0 || z1 == CHUNK_SIZE - 1) {
-                     VertexColorData.put(createCubeVertexCol(getCubeColor(blocks[x1][y][z1])));
-                     } else {
-                     VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
-                     }
-                     */
                     VertexColorData.put(createCubeVertexCol(new float[]{1, 1, 1}));
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, blocks[x1][y][z1].getBlockType()));
                 }
@@ -484,7 +476,7 @@ public class Chunk {
         }
     }
 
-    //AMADOR: Determines if a ray intersects a plane. The r0 and r1 parameters represent two points of
+    //AMADOR: Determines if a ray intersects a plane. The ray0 and ray1 parameters represent two points of
     //ray line. The P, Q, R parameters represent three points in the plane. In this implementation, the plane
     //is the plane for the current face being tested on a block.
     public static Vector3Float rayIntersect(Vector3Float ray0, Vector3Float ray1,

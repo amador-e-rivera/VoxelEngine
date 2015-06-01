@@ -8,7 +8,7 @@ package final_program;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- *
+ * Simplay displays a crosshair
  * @author Amador
  */
 public class Crosshair {
