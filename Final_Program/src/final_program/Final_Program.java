@@ -59,8 +59,10 @@ public class Final_Program {
 
         glEnable(GL_TEXTURE_2D);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        
+
         initFog();
+
+        initLightArrays();
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -80,7 +82,28 @@ public class Final_Program {
         glFog(GL_FOG_COLOR, fog_Color);
         glFogf(GL_FOG_DENSITY, 0.0075f);
     }
-    
+
+    private void initLightArrays() {
+        FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+        FloatBuffer ambient = BufferUtils.createFloatBuffer(4);
+        ambient.put(1f).put(1f).put(1f).put(1.0f).flip();
+        FloatBuffer diffuse = BufferUtils.createFloatBuffer(4);
+        diffuse.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
+        FloatBuffer specular = BufferUtils.createFloatBuffer(4);
+        specular.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
+
+        glLight(GL_LIGHT0, GL_POSITION, lightPosition); //sets our light’s position
+        glLight(GL_LIGHT0, GL_SPECULAR, specular);//sets our specular light
+        glLight(GL_LIGHT0, GL_DIFFUSE, diffuse);//sets our diffuse light
+        glLight(GL_LIGHT0, GL_AMBIENT, ambient);//sets our ambient light
+        glEnable(GL_LIGHTING);//enables our lighting
+        glEnable(GL_LIGHT0);//enables light0
+        
+        //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+        //glEnable(GL_COLOR_MATERIAL);
+    }
+
     /**
      * @param args the command line arguments
      */

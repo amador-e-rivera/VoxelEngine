@@ -27,7 +27,7 @@ public class Chunk {
     private int VBOTextureHandle;
     private int StartX, StartY, StartZ, noise_Seed;
     private Random r;
-    FloatBuffer VertexTextureData, VertexPositionData, VertexColorData;
+    FloatBuffer VertexTextureData, VertexPositionData, VertexColorData, NormalsBuffer;
     private float[] vertices;
     private TreeMap<Float, float[]> selectedBlocks;
 
@@ -63,6 +63,10 @@ public class Chunk {
 
     public void render() {
         glPushMatrix();
+        //AMADOR: Used the following 2 commands to render the lighting on the chunk.
+        //glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glNormalPointer(0, NormalsBuffer);
+
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glVertexPointer(3, GL_FLOAT, 0, 0L);
         glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
@@ -180,6 +184,8 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        //normals_Buffer(VertexPositionData);
     }
 
     private void setBlockType(int max_Height, int x, int y, int z) {
@@ -483,8 +489,6 @@ public class Chunk {
     //is the plane for the current face being tested on a block.
     public static Vector3Float rayIntersect(Vector3Float ray0, Vector3Float ray1,
             Vector3Float P, Vector3Float Q, Vector3Float R) {
-        Vector3Float PQ = new Vector3Float(Q.x - P.x, Q.y - P.y, Q.z - P.z);
-        Vector3Float PR = new Vector3Float(R.x - P.x, R.y - P.y, R.z - P.z);
         float t;
 
         //AMADOR:
@@ -495,7 +499,7 @@ public class Chunk {
         //
         //Plane Equation (Note that <a,b,c> is the normal of the plane):
         //f(x,y,z) = ax + by + cz + d
-        Vector3Float normal = normal(PQ, PR); //AMADOR: normal is <a,b,c>
+        Vector3Float normal = normal(P, Q, R); //AMADOR: normal is <a,b,c>
         float a = normal.x;
         float b = normal.y;
         float c = normal.z;
@@ -515,10 +519,53 @@ public class Chunk {
         }
     }
 
+    private void normals_Buffer(FloatBuffer vertices) {
+        NormalsBuffer = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 18);
+
+        for (int i = 0; i < vertices.limit(); i += 12) {
+            Vector3Float n1 = normal(
+                    new Vector3Float(vertices.get(i), vertices.get(i + 1), vertices.get(i + 2)),
+                    new Vector3Float(vertices.get(i + 3), vertices.get(i + 4), vertices.get(i + 5)),
+                    new Vector3Float(vertices.get(i + 6), vertices.get(i + 7), vertices.get(i + 8))
+            );
+
+            Vector3Float n2 = normal(
+                    new Vector3Float(vertices.get(i + 3), vertices.get(i + 4), vertices.get(i + 5)),
+                    new Vector3Float(vertices.get(i + 6), vertices.get(i + 7), vertices.get(i + 8)),
+                    new Vector3Float(vertices.get(i + 9), vertices.get(i + 10), vertices.get(i + 11))
+            );
+
+            Vector3Float normalized = normalize(new Vector3Float(n1.x + n2.x, n1.y + n2.y, n1.z + n2.z));
+            NormalsBuffer.put(normalized.x).put(normalized.y).put(normalized.z);
+        }
+
+        NormalsBuffer.flip();
+    }
+
     //AMADOR: This method simply returns the normal (Cross Product) of two vectors.
-    public static Vector3Float normal(Vector3Float v1, Vector3Float v2) {
-        return new Vector3Float((v1.y * v2.z) - (v1.z * v2.y), (v1.z * v2.x) - (v1.x * v2.z),
-                (v1.x * v2.y) - (v1.y * v2.x));
+    public static Vector3Float normal(Vector3Float P, Vector3Float Q, Vector3Float R) {
+        Vector3Float PQ = new Vector3Float(Q.x - P.x, Q.y - P.y, Q.z - P.z);
+        Vector3Float PR = new Vector3Float(R.x - P.x, R.y - P.y, R.z - P.z);
+
+        return new Vector3Float((PQ.y * PR.z) - (PQ.z * PR.y), (PQ.z * PR.x) - (PQ.x * PR.z),
+                (PQ.x * PR.y) - (PQ.y * PR.x));
+    }
+
+    //AMADOR: Normalizes a normal.
+    public static Vector3Float normalize(Vector3Float v) {
+        float length;
+
+        length = (float) Math.sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+
+        if (length == 0) {
+            length = 1;
+        }
+
+        v.x /= length;
+        v.y /= length;
+        v.z /= length;
+
+        return v;
     }
 
     private void outlineBlock() {
